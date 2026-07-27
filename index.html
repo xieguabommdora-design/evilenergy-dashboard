@@ -301,7 +301,7 @@
 </div>
 
 <script>
-const PAYLOAD = {"mode": "gz", "url": "data.json?v=202607251024"};
+const PAYLOAD = {"mode": "gz", "url": "data.json?v=202607271659"};
 let DASHBOARD_DATA = null;
 let D = null;
 
@@ -959,8 +959,8 @@ function renderCompare(){
         if(isPmax && state.containerType==='ag'){
           frows = frows.filter(r=>r.gid===state.container);
         }else{
-          // 非 PMax Shopping 广告组下钻：按 gid 过滤
-          frows = frows.filter(r=>r.gid===state.container);
+          // 非 PMax 标准购物广告：素材/产品日效果 CSV 不带广告组 ID，
+          // feed 数据只能拆到系列级，因此保留该系列全部 feed 行聚合到 SKU
         }
       }
       campPl = (D.campaigns.find(r=>r.cid===state.campaign)||{}).pl;

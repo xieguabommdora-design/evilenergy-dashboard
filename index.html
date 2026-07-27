@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>谷歌全链路看板</title>
+<script src="./echarts.min.js"></script>
+<style>
+  :root{
+    --bg:#f5f6fa; --card:#fff; --line:#e6e8ef; --txt:#1f2430; --sub:#8a90a2;
+    --brand:#2f6bff; --red:#e23d3d; --green:#1ea672; --warn:#f5a623; --purple:#7a5af5;
+    --chip:#eef2ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--txt);font-size:13px}
+  .wrap{max-width:1440px;margin:0 auto;padding:16px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  header h1{font-size:19px;font-weight:700}
+  header .sub{color:var(--sub);font-size:12px;margin-top:2px}
+  /* filter bar */
+  .filters{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end;margin-bottom:14px}
+  .filters .f{display:flex;flex-direction:column;gap:4px}
+  .filters label{font-size:11px;color:var(--sub)}
+  .filters select,.filters input{height:30px;border:1px solid var(--line);border-radius:8px;padding:0 8px;background:#fff;font-size:13px;color:var(--txt)}
+  .filters .clear{cursor:pointer;color:var(--brand);font-size:12px;height:30px;display:flex;align-items:center;padding:0 6px}
+  .filters .active-tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .tag{background:var(--chip);color:var(--brand);border-radius:20px;padding:4px 10px;font-size:12px;display:flex;align-items:center;gap:6px}
+  .tag b{cursor:pointer;font-weight:700}
+  /* 面包屑 */
+  .crumb{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;margin:2px 0 10px;color:var(--sub)}
+  .crumb .seg{cursor:pointer;padding:3px 10px;border-radius:14px;background:var(--chip);color:var(--brand);border:1px solid transparent}
+  .crumb .seg:hover{background:#e9f0ff;border-color:var(--brand)}
+  .crumb .seg.cur{background:var(--brand);color:#fff;cursor:default}
+  .crumb .arrow{color:var(--sub);font-size:12px}
+  /* KPI */
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:14px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .kpi .t{color:var(--sub);font-size:12px}
+  .kpi .v{font-size:22px;font-weight:700;margin-top:4px}
+  .kpi .d{font-size:12px;margin-top:4px}
+  .up{color:var(--green)} .down{color:var(--red)} .flat{color:var(--sub)}
+  /* layout */
+  .grid{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .card h3{font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+  .card h3 .hint{font-size:11px;color:var(--sub);font-weight:400}
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--sub);font-weight:600;cursor:pointer;user-select:none;background:#fff;position:sticky;top:0;z-index:1}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:#f7f9ff}
+  .pill{padding:2px 8px;border-radius:20px;font-size:11px;background:#eef2ff;color:var(--brand)}
+  .pill.r{background:#ffeaea;color:var(--red)} .pill.g{background:#e7f8f0;color:var(--green)}
+  .num-neg{color:var(--red)} .num-pos{color:var(--green)}
+  #campTable th,#campTable td,#plTable th,#plTable td{padding:5px 4px;font-size:10.5px}
+  #campTable th:first-child,#plTable th:first-child{min-width:120px;z-index:2}
+  .wrap-card{overflow:auto}
+  /* anomaly */
+  .anom{display:flex;flex-direction:column;gap:10px}
+  .anom .empty{color:var(--sub);font-size:12px;padding:10px}
+  .anom-group{border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
+  .anom-group.y{border-left:4px solid var(--warn)}
+  .anom-group.r{border-left:4px solid var(--red)}
+  .anom-group-title{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f8fafc;font-weight:700;font-size:13px;color:#0f172a}
+  .anom-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:#e2e8f0;color:#475569;font-size:11px}
+  .anom-group.y .anom-count{background:#fff3cd;color:#8a6d00}
+  .anom-group.r .anom-count{background:#ffeaea;color:#991b1b}
+  .anom-list{padding:4px 12px 10px;display:flex;flex-direction:column;gap:2px}
+  .anom-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:5px 0;border-bottom:1px dashed #f1f5f9;font-size:12px}
+  .anom-row:last-child{border-bottom:none}
+  .anom-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;color:#0f172a}
+  .anom-detail{flex-shrink:0;color:var(--sub);font-size:11px;white-space:nowrap}
+  .anom-more{color:var(--sub);font-size:11px;padding:4px 0 0}
+  .section-title{font-size:15px;font-weight:700;margin:4px 0 10px}
+  .note{background:#fffbe9;border:1px solid #ffe69a;border-radius:8px;padding:8px 10px;font-size:12px;color:#8a6d00;margin-bottom:14px}
+  .legend{font-size:11px;color:var(--sub);margin-top:6px}
+  .btn{background:var(--brand);color:#fff;border:none;border-radius:8px;height:30px;padding:0 16px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+  .btn:hover{opacity:.92}
+  .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--txt)}
+  .stack{display:flex;flex-direction:column;gap:14px;margin-bottom:14px}
+  @media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="loading-overlay" style="position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;background:#fff;font-family:-apple-system,Segoe UI,Roboto,sans-serif;">
+  <div style="text-align:center;">
+    <div style="width:36px;height:36px;border:3px solid #e2e8f0;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;"></div>
+    <div style="font-size:14px;color:#64748b;">正在加载数据…</div>
+  </div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>谷歌全链路看板</h1>
+      <div class="sub">Evil Energy · ievilenergy.myshopify.com · 数据区间 <span id="daterange"></span> · ROI 为平台口径(Google Ads 转化价值)</div>
+    </div>
+    <div style="font-size:11px;color:var(--sub)">点击品线 / 类型 / 系列行即可联动筛选 · 数据来自 Google Ads API 自动拉取</div>
+  </header>
+
+  <div class="note">✅ <b>Shopify 真实数据</b>已接入（SKU 销售额/销量/订单数 + 品线级汇总 + 全站流量/转化率）。✅ <b>竞品展示份额</b>已接入。✅ <b>广告负责人</b>已按后台标签定责。品类流量/转化率已按<b>落地页级</b> ShopifyQL 聚合到各 product_type（真人流量，成单数÷sessions）。</div>
+
+  <div class="filters">
+    <div class="f"><label>品线</label><select id="f-pl"><option value="">全部</option></select></div>
+    <div class="f"><label>广告类型</label><select id="f-type"><option value="">全部</option></select></div>
+    <div class="f"><label>广告负责人</label><select id="f-owner"><option value="">全部</option></select></div>
+    <div class="f"><label>运营人员</label><select id="f-op"><option value="">全部</option></select></div>
+    <div class="f"><label>开始日期</label><input type="date" id="f-start"></div>
+    <div class="f"><label>结束日期</label><input type="date" id="f-end"></div>
+    <div class="f"><label><input type="checkbox" id="f-cmp"> 对比期</label></div>
+    <div class="f"><label>对比开始</label><input type="date" id="f-cstart"></div>
+    <div class="f"><label>对比结束</label><input type="date" id="f-cend"></div>
+    <button class="btn" id="f-query">查询</button>
+    <div class="clear" id="f-clear">清除筛选 ✕</div>
+    <div class="active-tags" id="active-tags"></div>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+  <div id="compare-notice" style="margin:-6px 0 8px 0;font-size:12px;color:var(--accent);min-height:18px;"></div>
+
+  <div class="grid">
+    <div class="card">
+      <h3 style="gap:10px">趋势图 <span class="hint" id="trend-hint">当前指标: <b>费用</b> · 点击切换</span>
+        <button class="btn" id="trend-cross" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">交叉视图</button>
+      </h3>
+      <div id="trend" style="height:300px"></div>
+    </div>
+    <div class="card">
+      <h3>广告类型分布 <span class="hint">点击扇区筛选</span></h3>
+      <div id="typePie" style="height:300px"></div>
+    </div>
+  </div>
+
+  <!-- 新老广告环比 -->
+  <div class="card">
+    <h3 style="gap:10px">新老广告环比 <span class="hint">按广告系列名中的上线日期（YYMMDD）计算：距期末 ≤90 天为新广告，>90 天为老广告</span>
+      <button class="btn" onclick="exportNewOld()" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">导出CSV</button></h3>
+    <div class="wrap-card" style="max-height:260px">
+      <table id="newoldTable">
+        <thead><tr>
+          <th>新老广告</th>
+          <th>系列数</th>
+          <th>ROI-本期</th><th>ROI-上期</th><th>ROI-环比</th>
+          <th>COST-本期</th><th>COST-上期</th><th>COST-环比</th>
+          <th>GMV-本期</th><th>GMV-上期</th><th>GMV-环比</th>
+          <th>CPC-本期</th><th>CPC-上期</th><th>CPC-环比</th>
+          <th>CVR-本期</th><th>CVR-上期</th><th>CVR-环比</th>
+          <th>CTR-本期</th><th>CTR-上期</th><th>CTR-环比</th>
+          <th>CPA-本期</th><th>CPA-上期</th><th>CPA-环比</th>
+          <th>销量-本期</th><th>销量-上期</th><th>销量-环比</th>
+          <th>客单价-本期</th><th>客单价-上期</th><th>客单价-环比</th>
+          <th>展示次数-本期</th><th>展示次数-上期</th><th>展示次数-环比</th>
+          <th>COST%-本期</th><th>COST%-上期</th><th>COST%-差额</th>
+          <th>GMV%-本期</th><th>GMV%-上期</th><th>GMV%-差额</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <h3 style="gap:10px">品线汇总 <span class="hint">点击行筛选该品线 · 表头与广告系列效果保持一致</span>
+        <button class="btn" onclick="exportTable('plTable','品线汇总')" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">导出CSV</button></h3>
+      <div class="wrap-card" style="max-height:260px">
+        <table id="plTable">
+          <thead><tr>
+            <th data-k="pl">品线</th>
+            <th data-k="owner">广告负责人</th>
+            <th data-k="op">运营人员</th>
+            <th data-k="roi">ROI-本期</th><th>ROI-上期</th><th>ROI-环比</th>
+            <th data-k="cost">COST-本期</th><th>COST-上期</th><th>COST-环比</th>
+            <th data-k="val">GMV-本期</th><th>GMV-上期</th><th>GMV-环比</th>
+            <th data-k="cpc">CPC-本期</th><th>CPC-上期</th><th>CPC-环比</th>
+            <th data-k="convRate">CVR-本期</th><th>CVR-上期</th><th>CVR-环比</th>
+            <th data-k="ctr">CTR-本期</th><th>CTR-上期</th><th>CTR-环比</th>
+            <th data-k="cpa">CPA-本期</th><th>CPA-上期</th><th>CPA-环比</th>
+            <th data-k="conv">销量-本期</th><th>销量-上期</th><th>销量-环比</th>
+            <th data-k="aov">客单价-本期</th><th>客单价-上期</th><th>客单价-环比</th>
+            <th data-k="imp">展示次数-本期</th><th>展示次数-上期</th><th>展示次数-环比</th>
+            <th data-k="costShare">COST%-本期</th><th>COST%-上期</th><th>COST%-差额</th>
+            <th data-k="gmvShare">GMV%-本期</th><th>GMV%-上期</th><th>GMV%-差额</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="gap:10px">广告系列效果（核心 · 下钻路径：品线 → 广告系列 → 素材组/广告组 → Feed）<span class="hint" id="camp-hint"></span>
+        <button class="btn" onclick="exportTable('campTable','广告系列效果')" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">导出CSV</button></h3>
+      <div class="crumb" id="crumb"></div>
+      <div class="wrap-card" style="max-height:480px">
+        <table id="campTable">
+          <thead><tr>
+            <th data-k="campaign">广告系列</th>
+            <th data-k="status">状态</th>
+            <th data-k="type">类型</th>
+            <th data-k="pl">品线</th>
+            <th data-k="op">运营人员</th>
+            <th data-k="roi">ROI-本期</th><th>ROI-上期</th><th>ROI-环比</th>
+            <th data-k="cost">COST-本期</th><th>COST-上期</th><th>COST-环比</th>
+            <th data-k="val">GMV-本期</th><th>GMV-上期</th><th>GMV-环比</th>
+            <th data-k="cpc">CPC-本期</th><th>CPC-上期</th><th>CPC-环比</th>
+            <th data-k="convRate">CVR-本期</th><th>CVR-上期</th><th>CVR-环比</th>
+            <th data-k="ctr">CTR-本期</th><th>CTR-上期</th><th>CTR-环比</th>
+            <th data-k="cpa">CPA-本期</th><th>CPA-上期</th><th>CPA-环比</th>
+            <th data-k="conv">销量-本期</th><th>销量-上期</th><th>销量-环比</th>
+            <th data-k="aov">客单价-本期</th><th>客单价-上期</th><th>客单价-环比</th>
+            <th data-k="imp">展示次数-本期</th><th>展示次数-上期</th><th>展示次数-环比</th>
+            <th data-k="costShare">COST%-本期</th><th>COST%-上期</th><th>COST%-差额</th>
+            <th data-k="gmvShare">GMV%-本期</th><th>GMV%-上期</th><th>GMV%-差额</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card" id="drillCard" style="display:none">
+      <div class="section-title" style="font-size:14px;margin-bottom:8px" id="drill-title"></div>
+      <div style="overflow:auto;max-height:240px">
+        <table id="drillTable">
+          <thead><tr id="drillHead"></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="gap:10px"><span id="compare-title">广告 × Shopify 站内 类目对比</span> <span class="hint" id="compare-hint">行=品线 · 左广告端 / 右 Shopify 站内端 · 流量/转化率=落地页级按品类聚合</span>
+        <button class="btn" id="compare-export" onclick="exportTable('compareTable','广告Shopify类目对比')" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">导出CSV</button></h3>
+      <div class="wrap-card" style="max-height:420px">
+        <table id="compareTable">
+          <thead><tr></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="hint" style="margin-top:6px" id="compare-note"></div>
+    </div>
+  </div>
+
+  <!-- 关键词分析 -->
+  <div class="card">
+    <h3 style="gap:10px">关键词分析 <span class="hint">整站搜索字词 · 全期累计 · 仅保留转化价值 Top 100</span>
+      <button class="btn" onclick="exportKeywordAll()" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">导出CSV</button></h3>
+    <div class="wrap-card" style="max-height:480px">
+      <table id="kwTable">
+        <thead><tr>
+          <th data-k="term">搜索字词</th>
+          <th data-k="cost">花费</th>
+          <th data-k="val">转化价值</th>
+          <th data-k="roi">ROI</th>
+          <th data-k="cpc">CPC</th>
+          <th data-k="cpa">CPA</th>
+          <th data-k="conv">转化次数</th>
+          <th data-k="cvr">转化率</th>
+          <th data-k="ctr">点击率</th>
+          <th data-k="imp">展示次数</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+      <div id="kwPager" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 4px;font-size:12px"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>异常提醒 <span class="hint">近半月 vs 前半月 · 仅状态 ENABLED 的系列 · 阈值：花费降超30% / 销售额降超25% / ROI跌破1</span></h3>
+    <div class="anom" id="anom"></div>
+  </div>
+
+  <div class="section-title" style="margin-top:18px">竞品分析 · 竞价洞察 <span style="font-size:12px;color:var(--sub);font-weight:400">账户级月度 · 与上方品线/系列筛选相互独立</span></div>
+  <div class="card">
+    <div style="display:flex;gap:14px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+      <div class="f" style="flex-direction:row;align-items:center;gap:6px"><label style="margin:0">广告类型</label>
+        <select id="auc-type" style="height:30px;border:1px solid var(--line);border-radius:8px;padding:0 8px;font-size:13px">
+          <option value="shopping">购物广告</option>
+          <option value="search">搜索广告</option>
+        </select>
+      </div>
+      <div class="f" style="flex-direction:row;align-items:center;gap:6px"><label style="margin:0">明细月份</label>
+        <select id="auc-month" style="height:30px;border:1px solid var(--line);border-radius:8px;padding:0 8px;font-size:13px"></select>
+      </div>
+      <span class="hint" id="auc-hint" style="font-size:11px;color:var(--sub)"></span>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>展示份额趋势 <span class="hint">您(本店,红) vs 主要竞品 · 单位 %</span></h3>
+        <div id="aucTrend" style="height:320px"></div>
+      </div>
+      <div class="card">
+        <h3>展示份额排名 <span class="hint" id="auc-rank-hint"></span></h3>
+        <div id="aucRank" style="height:320px"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3>竞品明细 <span class="hint" id="auc-table-hint"></span></h3>
+      <div style="overflow:auto;max-height:380px">
+        <table id="aucTable"><thead></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PAYLOAD = {"mode": "gz", "url": "data.json?v=202607251024"};
+let DASHBOARD_DATA = null;
+let D = null;
+
+// ---------- helpers ----------
+const fmtMoney = v => (v==null?'—':((v>=0?'':'-') + '$' + Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})));
+const fmtNum = v => (v==null?'—':v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
+const fmtPct = v => (v==null?'—':(v*100).toFixed(2)+'%');
+const STATUS_LABEL = {ENABLED:'已启用', PAUSED:'已暂停', REMOVED:'已移除'};
+const TYPE_LABEL = {PERFORMANCE_MAX:'效果最大化', SEARCH:'搜索', SHOPPING:'购物',
+  DEMAND_GEN:'需求开发', DISPLAY:'展示', VIDEO:'视频',
+  SHOPPING_COMPARISON_LISTING:'购物比价', LOCAL:'本地', SMART:'智能'};
+const sum = (a,k)=>a.reduce((s,x)=>s+(+x[k]||0),0);
+function agg(rows){
+  const cost=sum(rows,'cost'), val=sum(rows,'val'), conv=sum(rows,'conv'),
+        imp=sum(rows,'imp'), clk=sum(rows,'clk');
+  return {cost,val,conv,imp,clk,
+    roi: cost? val/cost : 0,
+    ctr: imp? clk/imp : 0,
+    cpc: clk? cost/clk : 0,
+    cpa: conv? cost/conv : 0,
+    convRate: clk? conv/clk : 0,
+    valPerConv: conv? val/conv : 0,
+    aov: conv? val/conv : 0,
+    costShare:0, gmvShare:0};
+}
+function pctChange(cur,prev){ if(!prev) return null; return (cur-prev)/Math.abs(prev); }
+function fmtChg(cur,prev,goodUp=true){
+  if(prev==null || prev===0 || isNaN(prev)) return {text:'—', cls:'flat'};
+  const ch=(cur-prev)/Math.abs(prev);
+  const up=ch>=0;
+  const cls=(up===goodUp)?'up':'down';
+  return {text:(up?'▲':'▼')+Math.abs(ch*100).toFixed(2)+'%', cls};
+}
+function fmtShareDiff(curShare,prevShare,goodUp=true){
+  const diff=(curShare||0)-(prevShare||0);
+  const up=diff>=0;
+  const cls=(up===goodUp)?'up':'down';
+  return {text:(up?'+':'')+(diff*100).toFixed(2)+'pp', cls};
+}
+function metricCells(cur,prev,grandCur,grandPrev){
+  const prevObj=prev||{};
+  const costShareCur=grandCur.cost? cur.cost/grandCur.cost : 0;
+  const gmvShareCur=grandCur.val? cur.val/grandCur.val : 0;
+  const costSharePrev=grandPrev.cost? (prevObj.cost||0)/grandPrev.cost : 0;
+  const gmvSharePrev=grandPrev.val? (prevObj.val||0)/grandPrev.val : 0;
+  const roiChg=fmtChg(cur.roi,prevObj.roi,true);
+  const costChg=fmtChg(cur.cost,prevObj.cost,false);
+  const gmvChg=fmtChg(cur.val,prevObj.val,true);
+  const cpcChg=fmtChg(cur.cpc,prevObj.cpc,false);
+  const cvrChg=fmtChg(cur.convRate,prevObj.convRate,true);
+  const ctrChg=fmtChg(cur.ctr,prevObj.ctr,true);
+  const cpaChg=fmtChg(cur.cpa,prevObj.cpa,false);
+  const convChg=fmtChg(cur.conv,prevObj.conv,true);
+  const aovChg=fmtChg(cur.aov,prevObj.aov,true);
+  const impChg=fmtChg(cur.imp,prevObj.imp,true);
+  const costDiff=fmtShareDiff(costShareCur,costSharePrev,false);
+  const gmvDiff=fmtShareDiff(gmvShareCur,gmvSharePrev,true);
+  return `
+    <td>${cur.roi.toFixed(2)}</td><td>${fmtNum(prevObj.roi)}</td><td class="${roiChg.cls}">${roiChg.text}</td>
+    <td>${fmtMoney(cur.cost)}</td><td>${fmtMoney(prevObj.cost)}</td><td class="${costChg.cls}">${costChg.text}</td>
+    <td>${fmtMoney(cur.val)}</td><td>${fmtMoney(prevObj.val)}</td><td class="${gmvChg.cls}">${gmvChg.text}</td>
+    <td>${fmtMoney(cur.cpc)}</td><td>${fmtMoney(prevObj.cpc)}</td><td class="${cpcChg.cls}">${cpcChg.text}</td>
+    <td>${fmtPct(cur.convRate)}</td><td>${fmtPct(prevObj.convRate)}</td><td class="${cvrChg.cls}">${cvrChg.text}</td>
+    <td>${fmtPct(cur.ctr)}</td><td>${fmtPct(prevObj.ctr)}</td><td class="${ctrChg.cls}">${ctrChg.text}</td>
+    <td>${fmtMoney(cur.cpa)}</td><td>${fmtMoney(prevObj.cpa)}</td><td class="${cpaChg.cls}">${cpaChg.text}</td>
+    <td>${fmtNum(cur.conv)}</td><td>${fmtNum(prevObj.conv)}</td><td class="${convChg.cls}">${convChg.text}</td>
+    <td>${fmtMoney(cur.aov)}</td><td>${fmtMoney(prevObj.aov)}</td><td class="${aovChg.cls}">${aovChg.text}</td>
+    <td>${fmtNum(cur.imp)}</td><td>${fmtNum(prevObj.imp)}</td><td class="${impChg.cls}">${impChg.text}</td>
+    <td>${fmtPct(costShareCur)}</td><td>${fmtPct(costSharePrev)}</td><td class="${costDiff.cls}">${costDiff.text}</td>
+    <td>${fmtPct(gmvShareCur)}</td><td>${fmtPct(gmvSharePrev)}</td><td class="${gmvDiff.cls}">${gmvDiff.text}</td>`;
+}
+
+// ---------- state ----------
+const state = {pl:'',type:'',owner:'',op:'',campaign:'',campaignName:'',container:'',containerName:'',containerType:'',feed:'',feedName:'',start:'',end:'',cmpOn:false,cstart:'',cend:''};
+const pending = {...state};          // 查询按钮触发前暂存筛选条件
+// D 在 startApp() 中赋值（解密后）
+let allDates = [];
+
+function applyDateDefault(){
+  const n = allDates.length;
+  // 默认最近 14 天，确保有完整上一期用于环比/对比
+  state.end = allDates[n-1];
+  state.start = allDates[Math.max(0, n-14)];
+  state.cend = allDates[Math.max(0, n-15)];
+  state.cstart = allDates[Math.max(0, n-28)];
+  state.cmpOn = false;
+  Object.assign(pending, state);
+}
+
+// ---------- filtering ----------
+function inRange(d,a,b){ return d>=a && d<=b; }
+function filterRows(rows){
+  return rows.filter(r=>
+    (!state.pl || r.pl===state.pl) &&
+    (!state.type || r.type===state.type) &&
+    (!state.owner || r.owner===state.owner) &&
+    (!state.op || r.op===state.op) &&
+    (!state.campaign || r.cid===state.campaign) &&
+    inRange(r.date,state.start,state.end));
+}
+function filterRowsCmp(rows){
+  if(!state.cmpOn) return [];
+  const cp = getComparePeriod();
+  return rows.filter(r=>
+    (!state.pl || r.pl===state.pl) &&
+    (!state.type || r.type===state.type) &&
+    (!state.owner || r.owner===state.owner) &&
+    (!state.op || r.op===state.op) &&
+    (!state.campaign || r.cid===state.campaign) &&
+    inRange(r.date,cp.d0,cp.d1));
+}
+
+// 统一计算有效对比期；若用户指定/自动计算出的对比期无数据，则回退到最近可用前序区间或当前区间前半段
+function getComparePeriod(){
+  let d0,d1,adjusted=false,auto=false;
+  if(state.cmpOn && state.cstart && state.cend){
+    d0=state.cstart; d1=state.cend;
+  }else{
+    [d0,d1]=prevPeriod(state.start,state.end); auto=true;
+  }
+  // 判断该对比期在全部广告数据中是否有数据
+  const hasData = D.campaigns && D.campaigns.some && D.campaigns.some(r=>inRange(r.date,d0,d1));
+  if(hasData) return {d0,d1,adjusted,auto};
+  // 无数据，需要回退
+  adjusted=true;
+  const allAvailableDates=[...new Set(D.campaigns.map(r=>r.date))].sort();
+  const curDates=[...new Set(filterRows(D.campaigns).map(r=>r.date))].sort();
+  if(!curDates.length) return {d0,d1,adjusted,auto}; // 当前区间也无数据，保持原值
+  const curStartIdx=allAvailableDates.indexOf(curDates[0]);
+  if(curStartIdx>0){
+    // 回退到当前区间之前最近一段等长可用数据
+    const daysNeeded=curDates.length;
+    const endIdx=curStartIdx-1;
+    const startIdx=Math.max(0,endIdx-daysNeeded+1);
+    d0=allAvailableDates[startIdx]; d1=allAvailableDates[endIdx];
+  }else{
+    // 当前区间已是最早数据，无更早数据：用当前区间前半段作为自我对比基期
+    const mid=Math.floor(curDates.length/2);
+    d0=curDates[0]; d1=curDates[Math.max(0,mid-1)];
+  }
+  return {d0,d1,adjusted,auto};
+}
+
+// ---------- render KPI ----------
+function fmtLocalDate(d){
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function prevPeriod(start,end){
+  const s=new Date(start+'T00:00:00'), e=new Date(end+'T00:00:00');
+  const days=Math.round((e-s)/86400000)+1;
+  const pe=new Date(s); pe.setDate(pe.getDate()-1);
+  const ps=new Date(pe); ps.setDate(ps.getDate()-days+1);
+  return [fmtLocalDate(ps), fmtLocalDate(pe)];
+}
+function filterRowsPrev(rows){
+  const cp = getComparePeriod();
+  return rows.filter(r=>
+    (!state.pl || r.pl===state.pl) &&
+    (!state.type || r.type===state.type) &&
+    (!state.owner || r.owner===state.owner) &&
+    (!state.op || r.op===state.op) &&
+    (!state.campaign || r.cid===state.campaign) &&
+    inRange(r.date,cp.d0,cp.d1));
+}
+function renderKPI(){
+  const cur = agg(filterRows(D.campaigns));
+  const prev = agg(filterRowsPrev(D.campaigns));
+  const aov = cur.conv? cur.val/cur.conv : 0;
+  const aovP = prev.conv? prev.val/prev.conv : 0;
+  const pnl = (label,val,prevVal,fmt,goodUp=true)=>{
+    let cls='flat',txt='—';
+    if(prevVal!=null && prevVal!==0){
+      const ch=(val-prevVal)/Math.abs(prevVal);
+      const up = ch>=0;
+      cls = (up===goodUp)?'up':'down';
+      txt = (up?'▲':'▼') + Math.abs(ch*100).toFixed(1)+'%';
+    }
+    return `<div class="kpi"><div class="t">${label}</div><div class="v">${fmt(val)}</div><div class="d ${cls}">${txt}</div></div>`;
+  };
+  // 销售额占比 / 花费占比：分子=当前筛选维度广告端合计；分母=当前时间区间内整个账户（不受品线/系列筛选）合计
+  const cp = getComparePeriod();
+  const [ps,pe] = [cp.d0, cp.d1];
+  const acctCur = agg(D.campaigns.filter(r=> inRange(r.date, state.start, state.end)));   // 当前时间区间·全账户
+  const acctPrev = agg(D.campaigns.filter(r=> inRange(r.date, ps, pe)));                   // 上期时间区间·全账户
+  const salesShareCur = acctCur.val ? cur.val/acctCur.val : 0;
+  const salesSharePrev = acctPrev.val ? prev.val/acctPrev.val : 0;
+  const costShareCur = acctCur.cost ? cur.cost/acctCur.cost : 0;
+  const costSharePrev = acctPrev.cost ? prev.cost/acctPrev.cost : 0;
+  const shareKpi =
+    pnl('销售额占比', salesShareCur, salesSharePrev, fmtPct) +
+    pnl('花费占比', costShareCur, costSharePrev, fmtPct);
+
+  document.getElementById('kpis').innerHTML =
+    pnl('总花费',cur.cost,prev.cost,fmtMoney) +
+    pnl('转化价值(GMV口径)',cur.val,prev.val,fmtMoney) +
+    pnl('ROI',cur.roi,prev.roi,v=>v.toFixed(2),true) +
+    pnl('转化次数',cur.conv,prev.conv,fmtNum) +
+    pnl('客单价(AOV)',aov,aovP,fmtMoney) +
+    pnl('点击率',cur.ctr,prev.ctr,fmtPct) +
+    pnl('展示次数',cur.imp,prev.imp,fmtNum) +
+    pnl('CPA',cur.cpa,prev.cpa,fmtMoney,false) +
+    pnl('CPC',cur.cpc,prev.cpc,fmtMoney,false) +
+    pnl('转化率',cur.convRate,prev.convRate,fmtPct) +
+    shareKpi;
+
+  const notice = document.getElementById('compare-notice');
+  if(notice){
+    if(cp.adjusted){
+      if(ps>=state.start && pe<=state.end){
+        notice.innerHTML = `⚠️ 对比期自动调整为当前区间前半段（${ps} ~ ${pe}），因所选时间范围已覆盖全部可用历史数据，无法计算真实环比。`;
+      }else{
+        notice.innerHTML = `⚠️ 对比期自动调整为 ${ps} ~ ${pe}（原对比期无数据），请以此区间为准。`;
+      }
+    }else{
+      notice.innerHTML = '';
+    }
+  }
+}
+
+// ---------- trend ----------
+let trendChart, typeChart;
+let trendMetric='cost';
+let trendCross=false;
+const metricLabels={cost:'费用',val:'转化价值',roi:'ROI',conv:'转化次数',imp:'展示',clk:'点击'};
+function renderTrendCross(){
+  const curRows=filterRows(D.campaigns);
+  const byDate={};
+  curRows.forEach(r=>{ (byDate[r.date]=byDate[r.date]||[]).push(r); });
+  const dates=Object.keys(byDate).sort();
+  const costData=[], valData=[], roiData=[];
+  dates.forEach(d=>{
+    const m=agg(byDate[d]);
+    costData.push(+m.cost.toFixed(2));
+    valData.push(+m.val.toFixed(2));
+    roiData.push(+m.roi.toFixed(3));
+  });
+  trendChart.setOption({
+    tooltip:{trigger:'axis'},
+    legend:{data:['费用','转化价值','ROI'],top:0},
+    grid:{left:52,right:60,top:38,bottom:30},
+    xAxis:{type:'category',data:dates,axisLabel:{fontSize:10}},
+    yAxis:[
+      {type:'value',name:'金额',position:'left',axisLabel:{fontSize:10,formatter:v=>v>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+v}},
+      {type:'value',name:'ROI',position:'right',axisLabel:{fontSize:10,formatter:v=>v.toFixed(2)},splitLine:{show:false}}
+    ],
+    series:[
+      {name:'费用',type:'bar',data:costData,yAxisIndex:0,itemStyle:{color:'#2f6bff'}},
+      {name:'转化价值',type:'line',smooth:true,data:valData,yAxisIndex:0,itemStyle:{color:'#1ea672'}},
+      {name:'ROI',type:'line',smooth:true,data:roiData,yAxisIndex:1,itemStyle:{color:'#f5a623'},lineStyle:{width:2}}
+    ]
+  },true);
+}
+function renderTrend(){
+  if(trendCross){ renderTrendCross(); return; }
+  const curRows=filterRows(D.campaigns), cmpRows=filterRowsCmp(D.campaigns);
+  const curByDate={}, cmpByDate={};
+  curRows.forEach(r=>{ (curByDate[r.date]=curByDate[r.date]||[]).push(r); });
+  cmpRows.forEach(r=>{ (cmpByDate[r.date]=cmpByDate[r.date]||[]).push(r); });
+  const dates=Object.keys(curByDate).sort();
+  const curSeries=dates.map(d=>{
+    const m=agg(curByDate[d]); return trendMetric==='roi'? +m.roi.toFixed(3) : +m[trendMetric].toFixed(2);
+  });
+  // align compare dates to current date index for visual overlay
+  const cmpDates=Object.keys(cmpByDate).sort();
+  let cmpSeries = state.cmpOn ? cmpDates.map(d=>{
+    const m=agg(cmpByDate[d]); return trendMetric==='roi'? +m.roi.toFixed(3) : +m[trendMetric].toFixed(2);
+  }) : [];
+  const opt={
+    tooltip:{trigger:'axis'},
+    legend:{data: state.cmpOn?['当前期','对比期']:['当前期'],top:0},
+    grid:{left:50,right:16,top:34,bottom:30},
+    xAxis:{type:'category',data:dates,axisLabel:{fontSize:10}},
+    yAxis:{type:'value',axisLabel:{fontSize:10}},
+    series:[
+      {name:'当前期',type:'line',smooth:true,data:curSeries,itemStyle:{color:'#2f6bff'},areaStyle:{opacity:0.08}},
+      ...(state.cmpOn?[ {name:'对比期',type:'line',smooth:true,data:cmpSeries,itemStyle:{color:'#b9c0d4'},lineStyle:{type:'dashed'}} ]:[])
+    ]
+  };
+  trendChart.setOption(opt,true);
+}
+function updateTrendHint(){
+  const el=document.getElementById('trend-hint');
+  const btn=document.getElementById('trend-cross');
+  if(trendCross){
+    el.innerHTML='交叉视图：费用 + 转化价值 + ROI · 点击返回单指标';
+    btn.textContent='单指标视图'; btn.className='btn ghost';
+  }else{
+    el.innerHTML=`当前指标: <b>${metricLabels[trendMetric]}</b> · 点击切换`;
+    btn.textContent='交叉视图'; btn.className='btn';
+  }
+}
+
+// ---------- type pie ----------
+function renderTypePie(){
+  const rows=filterRows(D.campaigns);
+  const byType={};
+  rows.forEach(r=>{ byType[r.type]=(byType[r.type]||0)+r.cost; });
+  const data=Object.entries(byType).map(([k,v])=>({name:k,value:+v.toFixed(0)}));
+  typeChart.setOption({
+    tooltip:{trigger:'item',formatter:'{b}: $'+'{c} ({d}%)'},
+    legend:{bottom:0,fontSize:10},
+    series:[{type:'pie',radius:['40%','68%'],center:['50%','45%'],
+      label:{fontSize:11},data}]
+  },true);
+}
+
+// ---------- tables ----------
+function sortableRows(rows, key, dir){
+  return [...rows].sort((a,b)=>{
+    let x=a[key],y=b[key];
+    if(typeof x==='string'){return dir*x.localeCompare(y);}
+    return dir*((+x||0)-(+y||0));
+  });
+}
+let campSortKey='cost', campSortDir=-1;
+let plSortKey='cost', plSortDir=-1;
+function renderCampaignTable(){
+  const curRows=filterRows(D.campaigns), prevRows=filterRowsPrev(D.campaigns);
+  const grandCur=agg(curRows), grandPrev=agg(prevRows);
+  const byCampCur={}, byCampPrev={};
+  curRows.forEach(r=>{
+    byCampCur[r.cid]=byCampCur[r.cid]||{campaign:r.campaign,pl:r.pl,type:r.type,cid:r.cid,status:r.status,op:r.op,rows:[]};
+    byCampCur[r.cid].rows.push(r);
+  });
+  prevRows.forEach(r=>{
+    byCampPrev[r.cid]=byCampPrev[r.cid]||{campaign:r.campaign,pl:r.pl,type:r.type,cid:r.cid,status:r.status,op:r.op,rows:[]};
+    byCampPrev[r.cid].rows.push(r);
+  });
+  let arr=Object.values(byCampCur).map(o=>({...o,...agg(o.rows)}));
+  arr.forEach(o=>{ o.costShare=grandCur.cost?o.cost/grandCur.cost:0; o.gmvShare=grandCur.val?o.val/grandCur.val:0; });
+  const prevMap={};
+  Object.values(byCampPrev).forEach(o=>{ const p={...o,...agg(o.rows)}; p.costShare=grandPrev.cost?p.cost/grandPrev.cost:0; p.gmvShare=grandPrev.val?p.val/grandPrev.val:0; prevMap[o.cid]=p; });
+  arr=sortableRows(arr,campSortKey,campSortDir);
+  const tb=document.querySelector('#campTable tbody');
+  tb.innerHTML=arr.map(o=>{
+    const prev=prevMap[o.cid]||{};
+    const sel = o.cid===state.campaign?'style="background:#eef2ff"':'';
+    const st = STATUS_LABEL[o.status]||o.status;
+    const ty = TYPE_LABEL[o.type]||o.type;
+    return `<tr data-cid="${o.cid}" data-name="${o.campaign}" ${sel}>
+      <td>${o.campaign}</td>
+      <td>${st}</td>
+      <td><span class="pill">${ty}</span></td>
+      <td>${o.pl}</td>
+      <td>${o.op||'—'}</td>
+      ${metricCells(o,prev,grandCur,grandPrev)}
+    </tr>`;
+  }).join('');
+  document.getElementById('camp-hint').textContent = state.campaign? `已选中：${state.campaignName}`:'';
+  tb.querySelectorAll('tr').forEach(tr=>tr.onclick=()=>{
+    state.campaign=tr.dataset.cid; state.campaignName=tr.dataset.name;
+    state.container=''; state.containerName=''; state.containerType='';
+    renderAll();
+  });
+  pending.campaign=state.campaign; pending.campaignName=state.campaignName;
+  document.querySelectorAll('#campTable th[data-k]').forEach(th=>th.onclick=()=>{
+    const k=th.dataset.k; if(k==='campaign'||k==='pl'||k==='type'||k==='status'||k==='op') return;
+    if(campSortKey===k) campSortDir*=-1; else {campSortKey=k;campSortDir=-1;}
+    renderCampaignTable();
+  });
+}
+
+// ---------- 新老广告环比 ----------
+function renderNewOldTable(){
+  const curRows=filterRows(D.campaigns), prevRows=filterRowsPrev(D.campaigns);
+  const grandCur=agg(curRows), grandPrev=agg(prevRows);
+  const endTs = +new Date(state.end + 'T00:00:00');
+  function classify(created){
+    if(!created) return 'unknown';
+    const diff = (endTs - +new Date(created + 'T00:00:00')) / (1000*60*60*24);
+    if(diff > 90) return 'old';
+    return 'new';
+  }
+  const curSeg={old:[],new:[],unknown:[]}, prevSeg={old:[],new:[],unknown:[]};
+  curRows.forEach(r=>curSeg[classify(r.created)].push(r));
+  prevRows.forEach(r=>prevSeg[classify(r.created)].push(r));
+  const arr=[
+    {key:'new', label:'新广告（≤3个月）'},
+    {key:'old', label:'老广告（>3个月）'},
+    {key:'unknown', label:'未识别上线时间'}
+  ].map(({key,label})=>{
+    const cur=agg(curSeg[key]), prev=agg(prevSeg[key]);
+    return {label, count: new Set(curSeg[key].map(r=>r.cid)).size, cur, prev};
+  });
+  const tb=document.querySelector('#newoldTable tbody');
+  tb.innerHTML=arr.map(o=>`<tr>
+    <td>${o.label}</td>
+    <td>${o.count}</td>
+    ${metricCells(o.cur,o.prev,grandCur,grandPrev)}
+  </tr>`).join('');
+}
+
+let kwSortKey='cost', kwSortDir=-1, kwPage=1, kwPageSize=200, kwLastTotal=-1;
+// ---------- 关键词分析 ----------
+function getKwRows(){
+  return sortableRows(D.searchTerms||[], kwSortKey, kwSortDir);
+}
+function renderKeywordTable(){
+  const all=getKwRows();
+  if(all.length!==kwLastTotal){ kwPage=1; kwLastTotal=all.length; }
+  const total=all.length;
+  const pages=Math.max(1, Math.ceil(total/kwPageSize));
+  if(kwPage>pages) kwPage=pages;
+  if(kwPage<1) kwPage=1;
+  const start=(kwPage-1)*kwPageSize;
+  const pageRows=all.slice(start, start+kwPageSize);
+  const tb=document.querySelector('#kwTable tbody');
+  if(!total){
+    tb.innerHTML='<tr><td colspan="10" style="color:var(--sub);padding:14px">当前无搜索字词数据</td></tr>';
+    document.getElementById('kwPager').innerHTML='';
+    return;
+  }
+  tb.innerHTML=pageRows.map(r=>`<tr>
+    <td>${r.term}</td>
+    <td>${fmtMoney(r.cost)}</td>
+    <td>${fmtMoney(r.val)}</td>
+    <td>${r.roi.toFixed(2)}</td>
+    <td>${fmtMoney(r.cpc)}</td>
+    <td>${fmtMoney(r.cpa)}</td>
+    <td>${fmtNum(r.conv)}</td>
+    <td>${fmtPct(r.cvr)}</td>
+    <td>${fmtPct(r.ctr)}</td>
+    <td>${fmtNum(r.imp)}</td>
+  </tr>`).join('');
+  document.querySelectorAll('#kwTable th[data-k]').forEach(th=>th.onclick=()=>{
+    const k=th.dataset.k; if(k==='term') return;
+    if(kwSortKey===k) kwSortDir*=-1; else {kwSortKey=k; kwSortDir=-1;}
+    kwPage=1; renderKeywordTable();
+  });
+  const p=document.getElementById('kwPager');
+  p.innerHTML=`<span style="color:var(--sub)">共 ${total} 条 · 第 ${kwPage}/${pages} 页</span>
+    <button class="btn pgbtn" data-p="1" ${kwPage===1?'disabled':''} style="height:24px;padding:0 8px;font-size:11px">首页</button>
+    <button class="btn pgbtn" data-p="${kwPage-1}" ${kwPage===1?'disabled':''} style="height:24px;padding:0 8px;font-size:11px">上一页</button>
+    <button class="btn pgbtn" data-p="${kwPage+1}" ${kwPage===pages?'disabled':''} style="height:24px;padding:0 8px;font-size:11px">下一页</button>
+    <button class="btn pgbtn" data-p="${pages}" ${kwPage===pages?'disabled':''} style="height:24px;padding:0 8px;font-size:11px">末页</button>
+    <label style="margin-left:8px">每页<select id="kwSize" style="height:24px">${[200,500,1000,2000].map(s=>`<option ${s===kwPageSize?'selected':''}>${s}</option>`).join('')}</select>条</label>
+    <label style="margin-left:8px">跳到<input id="kwJump" type="number" min="1" max="${pages}" value="${kwPage}" style="width:54px;height:24px">页<button class="btn" id="kwGo" style="height:24px;padding:0 8px;font-size:11px">Go</button></label>`;
+  p.querySelectorAll('.pgbtn').forEach(b=>b.onclick=()=>{ const n=+b.dataset.p; if(n>=1&&n<=pages){kwPage=n; renderKeywordTable();} });
+  p.querySelector('#kwSize').onchange=e=>{ kwPageSize=+e.target.value; kwPage=1; kwLastTotal=-1; renderKeywordTable(); };
+  p.querySelector('#kwGo').onclick=()=>{ const n=+p.querySelector('#kwJump').value; if(n>=1&&n<=pages){kwPage=n; renderKeywordTable();} };
+}
+
+// ---------- 面包屑导航 ----------
+function renderCrumb(){
+  const segs=[];
+  if(state.pl) segs.push({label:state.pl, act:()=>{state.pl='';document.getElementById('f-pl').value='';resetDrill();renderAll();}});
+  else segs.push({label:'全部品线', act:null});
+  if(state.campaign) segs.push({label:state.campaignName, act:()=>{state.container='';state.containerName='';state.containerType='';state.feed='';state.feedName='';renderAll();}});
+  else segs.push({label:'全部广告系列', act:null});
+  if(state.container) segs.push({label:state.containerName, act:()=>{state.feed='';state.feedName='';renderAll();}});
+  if(state.feed) segs.push({label:state.feedName||state.feed, act:()=>{state.feed='';state.feedName='';renderAll();}});
+  const el=document.getElementById('crumb');
+  el.innerHTML=segs.map((s,i)=>{
+    const cur = i===segs.length-1;
+    const pre = i>0? '<span class="arrow">›</span>':'';
+    return `${pre}<span class="seg ${cur?'cur':''}" ${s.act?'data-i="'+i+'"':''}>${s.label}</span>`;
+  }).join('');
+  el.querySelectorAll('.seg[data-i]').forEach(s=>s.onclick=()=>segs[+s.dataset.i].act());
+}
+function resetDrill(){ state.campaign='';state.campaignName='';state.container='';state.containerName='';state.containerType='';state.feed='';state.feedName=''; }
+// ---------- 多级下钻（素材组/广告组 → Feed） ----------
+function renderDrill(){
+  const card=document.getElementById('drillCard');
+  const title=document.getElementById('drill-title');
+  const head=document.getElementById('drillHead');
+  const tb=document.querySelector('#drillTable tbody');
+  if(!state.campaign){ card.style.display='none'; return; }
+  const campType=(D.campaigns.find(r=>r.cid===state.campaign)||{}).type;
+  const isPmax = campType==='PERFORMANCE_MAX';
+
+  // ---- L5：Feed → SKU（已选定 feed 维度时下钻到 SKU）----
+  if(state.feed){
+    renderDrillSku(card, title, head, tb, isPmax);
+    return;
+  }
+
+  // ---- L3：素材组(PMax) 或 广告组(其他) ----
+  if(!state.container){
+    if(isPmax){
+      const rows=filterRows(D.assetgroups).filter(r=>r.cid===state.campaign);
+      const byG={};
+      rows.forEach(r=>{ byG[r.gid]=byG[r.gid]||{name:r.assetgroup,status:r.status,gid:r.gid,rows:[]}; byG[r.gid].rows.push(r); });
+      const arr=Object.values(byG).map(o=>({...o,...agg(o.rows)}));
+      if(arr.length===0){ card.style.display='block'; title.textContent='▸ '+state.campaignName+' 的素材组（当前范围无数据）';
+        head.innerHTML='<th>素材组</th><th>费用</th><th>转化价值</th><th>ROI</th><th>转化</th><th>状态</th>';
+        tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--sub);padding:14px">无素材组数据</td></tr>'; return; }
+      card.style.display='block';
+      title.textContent='▸ '+state.campaignName+' 的素材组（点击下钻到 Feed）';
+      head.innerHTML='<th>素材组</th><th>费用</th><th>转化价值</th><th>ROI</th><th>转化</th><th>状态</th>';
+      tb.innerHTML=arr.map(o=>`<tr data-gid="${o.gid}" data-name="${o.name}">
+        <td>${o.name}</td><td>${fmtMoney(o.cost)}</td><td>${fmtMoney(o.val)}</td>
+        <td>${o.roi.toFixed(2)}</td><td>${fmtNum(o.conv)}</td><td>${o.status}</td></tr>`).join('');
+      tb.querySelectorAll('tr').forEach(tr=>tr.onclick=()=>{
+        state.container=tr.dataset.gid; state.containerName=tr.dataset.name; state.containerType='ag'; state.feed=''; state.feedName=''; renderAll();
+      });
+    }else{
+      const rows=filterRows(D.adgroups).filter(r=>r.cid===state.campaign);
+      const byG={};
+      rows.forEach(r=>{ byG[r.gid]=byG[r.gid]||{name:r.adgroup,status:r.status,gid:r.gid,rows:[]}; byG[r.gid].rows.push(r); });
+      const arr=Object.values(byG).map(o=>({...o,...agg(o.rows)}));
+      if(arr.length===0){ card.style.display='block'; title.textContent='▸ '+state.campaignName+' 的广告组（当前范围无数据）';
+        head.innerHTML='<th>广告组</th><th>费用</th><th>转化价值</th><th>ROI</th><th>转化</th><th>状态</th>';
+        tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--sub);padding:14px">无广告组数据</td></tr>'; return; }
+      card.style.display='block';
+      title.textContent='▸ '+state.campaignName+' 的广告组'+(campType==='SHOPPING'?'（点击下钻到 商品Feed）':'');
+      head.innerHTML='<th>广告组</th><th>费用</th><th>转化价值</th><th>ROI</th><th>转化</th><th>状态</th>';
+      tb.innerHTML=arr.map(o=>`<tr data-gid="${o.gid}" data-name="${o.name}">
+        <td>${o.name}</td><td>${fmtMoney(o.cost)}</td><td>${fmtMoney(o.val)}</td>
+        <td>${o.roi.toFixed(2)}</td><td>${fmtNum(o.conv)}</td><td>${o.status}</td></tr>`).join('');
+      tb.querySelectorAll('tr').forEach(tr=>tr.onclick=()=>{
+        state.container=tr.dataset.gid; state.containerName=tr.dataset.name; state.containerType='adg'; state.feed=''; state.feedName=''; renderAll();
+      });
+    }
+    return;
+  }
+
+  // ---- L4：Feed 维度（点击 feed 行下钻到 SKU）----
+  let rows;
+  if(state.containerType==='ag'){
+    rows=filterRows(D.feed).filter(r=>r.isPmax && r.cid===state.campaign && r.gid===state.container);
+  }else{
+    // 购物广告组：product 级别 feed 挂在系列下（非广告组级），展示该系列商品 Feed
+    rows=filterRows(D.feed).filter(r=>!r.isPmax && r.cid===state.campaign);
+  }
+  title.textContent='▸ '+state.campaignName+' › '+state.containerName+' 的 Feed（点击下钻到 SKU）';
+  head.innerHTML='<th>Feed 维度</th><th>费用</th><th>转化价值</th><th>ROI</th><th>转化</th><th></th>';
+  if(rows.length===0){
+    card.style.display='block';
+    tb.innerHTML='<tr><td colspan="6" style="text-align:left;color:var(--sub);padding:14px 16px">'+
+      (state.containerType==='ag'
+        ? 'PMax 产品级（listing group）指标在 Google Ads API v24 暂不可拉取，<b>素材组</b>为当前最深可下钻层级。'
+        : '该系列无商品 Feed 数据（可能无购物类目或当前范围无转化）')+'</td></tr>';
+    return;
+  }
+  const byF={};
+  rows.forEach(r=>{ byF[r.feed]=byF[r.feed]||{feed:r.feed,rows:[]}; byF[r.feed].rows.push(r); });
+  const arr=Object.values(byF).map(o=>({...o,...agg(o.rows)})).sort((a,b)=>b.cost-a.cost);
+  tb.innerHTML=arr.map(o=>`<tr data-feed="${encodeURIComponent(o.feed)}" style="cursor:pointer">
+    <td>${o.feed}</td><td>${fmtMoney(o.cost)}</td><td>${fmtMoney(o.val)}</td>
+    <td>${o.roi.toFixed(2)}</td><td>${fmtNum(o.conv)}</td><td style="color:var(--brand);font-size:12px">› SKU</td></tr>`).join('');
+  tb.querySelectorAll('tr[data-feed]').forEach(tr=>tr.onclick=()=>{
+    state.feed=decodeURIComponent(tr.dataset.feed); state.feedName=state.feed; renderAll();
+  });
+  card.style.display='block';
+}
+// ---- L5 渲染：feed 维度 → SKU（联动 Shopify 销售额/订单数，按所选日期区间汇总）----
+function renderDrillSku(card, title, head, tb, isPmax){
+  let frows = filterRows(D.feed).filter(r=>r.cid===state.campaign && r.feed===state.feed && (state.containerType==='ag'? (r.isPmax && r.gid===state.container) : !r.isPmax));
+  const fids=[...new Set(frows.map(r=>((r.feedid||r.feed)+'')))];
+  const skuMap={};
+  fids.forEach(fid=>{ const sku=(D.feedSkuMap||{})[fid]; if(sku){ (skuMap[sku]=skuMap[sku]||{sku,rows:[]}).rows.push(frows.find(r=>((r.feedid||r.feed)+'')===fid)); } });
+  // 兜底：feed 未直接映射 SKU 时，带出同品线 Shopify 已知 SKU（与「广告×Shopify对比」板块一致）
+  const campPl=(D.campaigns.find(r=>r.cid===state.campaign)||{}).pl;
+  let usedFallback=false;
+  if(!Object.keys(skuMap).length){
+    Object.entries(D.shopifySkuCompare||{}).forEach(([sku,o])=>{
+      const pl=alignPl(o.pt);
+      if(campPl && pl!==campPl) return;
+      skuMap[sku]=skuMap[sku]||{sku,rows:[]};
+    });
+    usedFallback=Object.keys(skuMap).length>0;
+  }
+  title.textContent='▸ '+state.campaignName+' › '+state.containerName+' › '+state.feed+' 的 SKU';
+  head.innerHTML='<th>SKU</th><th>类目</th><th>广告费用</th><th>广告GMV</th><th>广告ROI</th><th>Shopify销售额</th><th>Shopify订单数</th><th>Shopify ROI</th>';
+  const arr=Object.values(skuMap);
+  if(!arr.length){
+    card.style.display='block';
+    tb.innerHTML='<tr><td colspan="8" style="text-align:left;color:var(--sub);padding:14px 16px">该 Feed 维度未匹配到 SKU，且同品线暂无 Shopify SKU 数据（可在「数据源」补充 feedid_sku_fallback.csv 后重建）</td></tr>';
+    return;
+  }
+  if(usedFallback){
+    title.textContent+='（该 Feed 未直接映射 SKU，已展示同品线 Shopify SKU）';
+  }
+  tb.innerHTML=arr.map(o=>{
+    const ad=agg(o.rows);
+    const s=(D.shopifySkuCompare||{})[o.sku];
+    const pt=(s&&s.pt)||'—';
+    const sd=sumDaily(D.shopifySkuDaily && D.shopifySkuDaily[o.sku], state.start, state.end);
+    const hasDaily=!!(D.shopifySkuDaily && D.shopifySkuDaily[o.sku]);
+    const dispSales=sd.sales>0? sd.sales : (hasDaily?0:(s?s.salesTotal:0));
+    const dispOrders=sd.orders>0? sd.orders : (hasDaily?0:(s?s.orders:0));
+    const shopRoi=(dispSales>0 && ad.cost>0)? (dispSales/ad.cost).toFixed(2):'—';
+    return `<tr><td>${o.sku}</td><td>${pt}</td>
+      <td>${fmtMoney(ad.cost)}</td><td>${fmtMoney(ad.val)}</td><td>${ad.roi.toFixed(2)}</td>
+      <td>${dispSales>0?fmtMoney(dispSales):(hasShopifyData()?'—':'待接入')}</td>
+      <td>${dispOrders>0?fmtNum(dispOrders):(hasShopifyData()?'—':'待接入')}</td>
+      <td>${shopRoi}</td></tr>`;
+  }).join('');
+  card.style.display='block';
+}
+function renderPlTable(){
+  const curRows=filterRows(D.campaigns), prevRows=filterRowsPrev(D.campaigns);
+  const grandCur=agg(curRows), grandPrev=agg(prevRows);
+  const byPlCur={}, byPlPrev={};
+  curRows.forEach(r=>{ byPlCur[r.pl]=byPlCur[r.pl]||[]; byPlCur[r.pl].push(r); });
+  prevRows.forEach(r=>{ byPlPrev[r.pl]=byPlPrev[r.pl]||[]; byPlPrev[r.pl].push(r); });
+  let arr=Object.entries(byPlCur).map(([pl,rs])=>({pl,...agg(rs)}));
+  arr.forEach(o=>{ o.costShare=grandCur.cost?o.cost/grandCur.cost:0; o.gmvShare=grandCur.val?o.val/grandCur.val:0; });
+  const prevMap={};
+  Object.entries(byPlPrev).forEach(([pl,rs])=>{ const p={pl,...agg(rs)}; p.costShare=grandPrev.cost?p.cost/grandPrev.cost:0; p.gmvShare=grandPrev.val?p.val/grandPrev.val:0; prevMap[pl]=p; });
+  arr=sortableRows(arr,plSortKey,plSortDir);
+  document.querySelector('#plTable tbody').innerHTML=arr.map(o=>{
+    const prev=prevMap[o.pl]||{};
+    const owner=(D.owners[o.pl]||{}).owner||'—';
+    const op=(D.owners[o.pl]||{}).op||'—';
+    return `<tr data-pl="${o.pl}"><td>${o.pl}</td><td>${owner}</td><td>${op}</td>${metricCells(o,prev,grandCur,grandPrev)}</tr>`;
+  }).join('');
+  document.querySelectorAll('#plTable tbody tr').forEach(tr=>tr.onclick=()=>{
+    const v = state.pl===tr.dataset.pl? '' : tr.dataset.pl;
+    state.pl = pending.pl = v;
+    document.getElementById('f-pl').value = v;
+    resetDrill();
+    renderAll();
+  });
+  document.querySelectorAll('#plTable th[data-k]').forEach(th=>th.onclick=()=>{
+    const k=th.dataset.k; if(k==='pl'||k==='owner'||k==='op') return;
+    if(plSortKey===k) plSortDir*=-1; else {plSortKey=k;plSortDir=-1;}
+    renderPlTable();
+  });
+}
+
+// ---------- 广告 × Shopify 类目/SKU 对比 ----------
+function hasShopifyData(){ return Object.keys(D.shopifyCompare||{}).length>0; }
+function alignPl(pt){ return (D.ptToPl||{})[pt] || (D.PL_SET && D.PL_SET.has(pt)? pt : null); }
+function renderCompare(){
+  const hasShop = hasShopifyData();
+  const tb = document.querySelector('#compareTable tbody');
+  const hd = document.querySelector('#compareTable thead tr');
+  const title = document.getElementById('compare-title');
+  const hint = document.getElementById('compare-hint');
+  const expBtn = document.getElementById('compare-export');
+  // 下钻到 Feed 级（系列+容器均已选中）时切换到 SKU 维度
+  const skuMode = !!(state.campaign && state.container);
+  // 品线级 SKU 模式：仅筛选了品线（未下钻到系列/容器）时，展示该品线下全部 SKU
+  const plSkuMode = !!(state.pl && !state.campaign);
+
+  if(skuMode || plSkuMode){
+    title.textContent = plSkuMode ? `广告 × Shopify 站内 · ${state.pl} 全部 SKU` : (state.feed ? `广告 × Shopify 站内 · Feed 级 SKU` : '广告 × Shopify 站内 SKU 对比');
+    hint.textContent='行=SKU · 左广告端 Feed 聚合 / 右 Shopify 站内端' + (plSkuMode ? ' · 已按品线联动' : (state.feed ? ' · 当前 Feed 精确匹配' : ''));
+    expBtn.setAttribute('onclick',"exportTable('compareTable','广告ShopifySKU对比')");
+    hd.innerHTML='<th data-k="sku">SKU</th><th data-k="pt">类目</th><th style="background:#E6F1FB;color:#042C53">广告费用</th><th style="background:#E6F1FB;color:#042C53">广告GMV</th><th style="background:#E6F1FB;color:#042C53">广告ROI</th><th style="background:#E6F1FB;color:#042C53">广告销量</th><th style="background:#E6F1FB;color:#042C53">广告CVR</th><th style="background:#E6F1FB;color:#042C53">广告客单价</th><th style="background:#EAF3DE;color:#173404">Shopify销售额</th><th style="background:#EAF3DE;color:#173404">Shopify ROI</th><th style="background:#EAF3DE;color:#173404">Shopify订单数</th><th style="background:#EAF3DE;color:#173404">Shopify流量(类目)</th><th style="background:#EAF3DE;color:#173404">Shopify转化率(类目)</th>';
+
+    let frows, campPl;
+    if(plSkuMode){
+      // 品线级：取该品线下所有 Feed 行（filterRows 已按 state.pl 过滤）
+      frows = filterRows(D.feed).filter(r=>r.pl===state.pl);
+      campPl = state.pl;
+    }else{
+      const isPmax = (D.campaigns.find(r=>r.cid===state.campaign)||{}).type==='PERFORMANCE_MAX';
+      frows = filterRows(D.feed).filter(r=>r.cid===state.campaign);
+      if(state.feed){
+        frows = frows.filter(r=>r.feed===state.feed);
+      }else if(state.container){
+        if(isPmax && state.containerType==='ag'){
+          frows = frows.filter(r=>r.gid===state.container);
+        }else{
+          // 非 PMax Shopping 广告组下钻：按 gid 过滤
+          frows = frows.filter(r=>r.gid===state.container);
+        }
+      }
+      campPl = (D.campaigns.find(r=>r.cid===state.campaign)||{}).pl;
+    }
+    const bySku={};
+    frows.forEach(r=>{
+      const sku = (D.feedSkuMap||{})[r.feedid||r.feed];
+      if(!sku) return;
+      bySku[sku]=bySku[sku]||{sku,rows:[]};
+      bySku[sku].rows.push(r);
+    });
+    // 同时把该系列/品线 对应 Shopify 侧已知的 SKU 也带出来（即便广告侧当前无消耗）
+    Object.entries(D.shopifySkuCompare||{}).forEach(([sku,o])=>{
+      const pl = alignPl(o.pt);
+      if(campPl && pl!==campPl) return;
+      if(!bySku[sku]) bySku[sku]={sku,rows:[]};
+      bySku[sku].shopify=o;
+    });
+    const arr=Object.values(bySku).map(o=>({...o.shopify||{}, ...agg(o.rows), sku:o.sku, rows:o.rows})).sort((a,b)=>b.cost-a.cost);
+    if(!arr.length){ tb.innerHTML='<tr><td colspan="13" style="color:var(--sub);padding:14px">'+(plSkuMode?'该品线下暂无 SKU 数据（可在「数据源」补充 feedid_sku_fallback.csv 后重建）':'当前 Feed 范围无 SKU 映射数据')+'</td></tr>'; document.getElementById('compare-note').textContent=''; return; }
+    tb.innerHTML=arr.map(o=>{
+      const s = D.shopifySkuCompare[o.sku];
+      const pl = alignPl((s||o).pt||'');
+      const cat = (s||o).pt || '—';
+      const catMetrics = pl? (D.shopifyCompare||{})[pl] : null;
+      // Shopify 销售额/订单数 跟随看板日期区间汇总
+      const skuDailyArr = D.shopifySkuDaily && D.shopifySkuDaily[o.sku];
+      const sd = sumDaily(skuDailyArr, state.start, state.end);
+      const hasDaily = !!skuDailyArr;
+      const dispSales = sd.sales>0 ? sd.sales : (hasDaily ? 0 : (s? s.salesTotal : 0));
+      const dispOrders = sd.orders>0 ? sd.orders : (hasDaily ? 0 : (s? s.orders : 0));
+      const shopRoi = (dispSales>0 && o.cost>0)? (dispSales/o.cost).toFixed(2) : '—';
+      return `<tr data-sku="${o.sku}">
+        <td>${o.sku}</td><td>${cat}</td>
+        <td>${fmtMoney(o.cost)}</td>
+        <td>${fmtMoney(o.val)}</td>
+        <td>${o.roi.toFixed(2)}</td>
+        <td>${fmtNum(o.conv)}</td>
+        <td>${(o.convRate*100).toFixed(2)}%</td>
+        <td>${fmtMoney(o.aov)}</td>
+        <td>${dispSales>0? fmtMoney(dispSales): (hasShop?'—':'待接入')}</td>
+        <td>${shopRoi}</td>
+        <td>${dispOrders>0? fmtNum(dispOrders): (hasShop?'—':'待接入')}</td>
+        <td>${catMetrics && catMetrics.sessions? fmtNum(catMetrics.sessions): (hasShop?'—':'待接入(token)')}</td>
+        <td>${catMetrics && catMetrics.cvr!=null? catMetrics.cvr.toFixed(2)+'%': (hasShop?'—':'待接入(token)')}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('compare-note').textContent = (plSkuMode?'品线 SKU 模式：':'SKU 模式：') + '广告侧按 FeedID→SKU 映射聚合；Shopify 销售额/订单数按看板所选日期区间汇总（日粒度），Shopify ROI = Shopify销售额÷广告费用，流量/转化率为该 SKU 所属类目（product_type）层级（全期累计）。';
+    return;
+  }
+
+  // 类目模式
+  title.textContent='广告 × Shopify 站内 类目对比';
+  hint.textContent='行=品线 · 左广告端 / 右 Shopify 站内端 · 流量/转化率=落地页级按品类聚合 · 点击品线行可展开该品线下全部 SKU';
+  expBtn.setAttribute('onclick',"exportTable('compareTable','广告Shopify类目对比')");
+  hd.innerHTML='<th data-k="pl">品线</th><th data-k="owner">广告负责人</th><th data-k="op">运营人员</th><th style="background:#E6F1FB;color:#042C53">广告费用</th><th style="background:#E6F1FB;color:#042C53">广告GMV</th><th style="background:#E6F1FB;color:#042C53">广告ROI</th><th style="background:#E6F1FB;color:#042C53">广告销量</th><th style="background:#E6F1FB;color:#042C53">广告CVR</th><th style="background:#E6F1FB;color:#042C53">广告客单价</th><th style="background:#EAF3DE;color:#173404">Shopify销售额</th><th style="background:#EAF3DE;color:#173404">Shopify ROI</th><th style="background:#EAF3DE;color:#173404">Shopify订单数</th><th style="background:#EAF3DE;color:#173404">Shopify流量</th><th style="background:#EAF3DE;color:#173404">Shopify转化率</th>';
+
+  const cur = filterRows(D.campaigns);
+  let pls = [...new Set(cur.map(r=>r.pl))];
+  Object.keys(D.shopifyCompare||{}).forEach(pl=>{ if(!pls.includes(pl)) pls.push(pl); });
+  if(!pls.length){ tb.innerHTML='<tr><td colspan="14" style="color:var(--sub);padding:14px">暂无品线数据</td></tr>'; document.getElementById('compare-note').textContent=''; return; }
+  tb.innerHTML = pls.map(pl=>{
+    const rows = cur.filter(r=>r.pl===pl);
+    const a = rows.length? agg(rows) : null;
+    const s = (D.shopifyCompare||{})[pl] || null;
+    const owner=(D.owners[pl]||{}).owner||'—';
+    const op=(D.owners[pl]||{}).op||'—';
+    const ad = (k,fmt)=> a? fmt(a[k]) : '—';
+    const sh = (k,fmt)=>{
+      if(!s) return hasShop? '—' : '待接入';
+      const v = s[k];
+      if(v===undefined || v===null || v===0) return hasShop? '—' : '待接入';
+        return fmt(v);
+      };
+      // Shopify 销售额/订单数 跟随看板日期区间汇总（该品线下所有原始品类日粒度求和）
+      let winSales=0, winOrders=0, hasDaily=false;
+      (window.PL_TO_PTS[pl]||[]).forEach(pt=>{
+        const arr = D.shopifyCatDaily && D.shopifyCatDaily[pt];
+        if(arr) hasDaily = true;
+        const d = sumDaily(arr, state.start, state.end);
+        winSales += d.sales; winOrders += d.orders;
+      });
+      const dispSales = winSales>0 ? winSales : (hasDaily ? 0 : (s? s.salesTotal : 0));
+      const dispOrders = winOrders>0 ? winOrders : (hasDaily ? 0 : (s? s.orders : 0));
+      const shopRoi = (dispSales>0 && a && a.cost>0)? (dispSales/a.cost).toFixed(2) : '—';
+      return `<tr data-pl="${pl}">
+        <td>${pl}</td><td>${owner}</td><td>${op}</td>
+        <td>${ad('cost',fmtMoney)}</td>
+        <td>${ad('val',fmtMoney)}</td>
+        <td>${a? a.roi.toFixed(2):'—'}</td>
+        <td>${ad('conv',fmtNum)}</td>
+        <td>${a? (a.convRate*100).toFixed(2)+'%':'—'}</td>
+        <td>${ad('aov',fmtMoney)}</td>
+        <td>${dispSales>0? fmtMoney(dispSales): (hasShop?'—':'待接入')}</td>
+        <td>${shopRoi}</td>
+        <td>${dispOrders>0? fmtNum(dispOrders): (hasShop?'—':'待接入')}</td>
+        <td>${sh('sessions',fmtNum)}</td>
+        <td>${s && s.cvr!=null? (s.cvr).toFixed(2)+'%' : (hasShop?'—':'待接入(token)')}</td>
+      </tr>`;
+    }).join('');
+  document.querySelectorAll('#compareTable tbody tr').forEach(tr=>tr.onclick=()=>{
+    const v = state.pl===tr.dataset.pl? '' : tr.dataset.pl;
+    state.pl = pending.pl = v;
+    document.getElementById('f-pl').value = v;
+    resetDrill(); renderAll();
+  });
+  document.getElementById('compare-note').textContent = hasShop
+    ? 'Shopify 销售额/订单数按看板所选日期区间汇总（日粒度），与广告端同窗口；流量/转化率为全期累计（ShopifyQL 不支持按日期拆分 sessions），未匹配到品线的类目暂不展示。'
+    : 'Shopify 端待接入：部署 webhook 或提供 access_token 后自动填充（流量 / 转化率需 token）';
+}
+
+// ---------- anomaly ----------
+function renderAnomaly(){
+  const rows=filterRows(D.campaigns);
+  const byCamp={};
+  rows.forEach(r=>{ (byCamp[r.cid]=byCamp[r.cid]||{name:r.campaign,pl:r.pl,status:r.status,rows:[]}).rows.push(r); });
+  const dates=[...new Set(rows.map(r=>r.date))].sort();
+  const mid=Math.floor(dates.length/2);
+  const firstHalf=dates.slice(0,mid), secondHalf=dates.slice(mid);
+  const groups={
+    cost:{title:'花费异常', cls:'y', items:[]},
+    sales:{title:'销售额下降', cls:'r', items:[]},
+    roi:{title:'ROI 跌破 1', cls:'r', items:[]}
+  };
+  Object.values(byCamp).forEach(o=>{
+    if(o.status !== 'ENABLED') return;
+    const f=agg(o.rows.filter(r=>firstHalf.includes(r.date)));
+    const s=agg(o.rows.filter(r=>secondHalf.includes(r.date)));
+    if(f.cost>0){
+      const cf=pctChange(s.cost,f.cost);
+      if(cf!=null && cf < -0.30)
+        groups.cost.items.push({name:o.name, detail:`下降 ${Math.abs(cf*100).toFixed(0)}% · 近半月 ${fmtMoney(s.cost)}`});
+    }
+    if(f.val>0){
+      const cv=pctChange(s.val,f.val);
+      if(cv!=null && cv<-0.25)
+        groups.sales.items.push({name:o.name, detail:`下降 ${Math.abs(cv*100).toFixed(0)}% · 近半月 ${fmtMoney(s.val)}`});
+    }
+    if(s.roi>0 && s.roi<1)
+      groups.roi.items.push({name:o.name, detail:`近半月 ROI ${s.roi.toFixed(2)}`});
+  });
+  const box=document.getElementById('anom');
+  const total = groups.cost.items.length + groups.sales.items.length + groups.roi.items.length;
+  if(!total){ box.innerHTML='<div class="empty">✅ 当前筛选下未触发异常阈值</div>'; return; }
+  box.innerHTML=Object.values(groups).filter(g=>g.items.length).map(g=>`
+    <div class="anom-group ${g.cls}">
+      <div class="anom-group-title">${g.title} <span class="anom-count">${g.items.length}</span></div>
+      <div class="anom-list">
+        ${g.items.slice(0,20).map(i=>`<div class="anom-row"><span class="anom-name" title="${i.name}">${i.name}</span><span class="anom-detail">${i.detail}</span></div>`).join('')}
+        ${g.items.length>20?`<div class="anom-more">… 还有 ${g.items.length-20} 条，可点击“广告系列”板块按日期/品线进一步筛选</div>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ---------- active tags ----------
+function renderTags(){
+  const tags=[];
+  if(state.pl) tags.push(`品线: ${state.pl}`);
+  if(state.type) tags.push(`类型: ${state.type}`);
+  if(state.owner) tags.push(`负责人: ${state.owner}`);
+  if(state.op) tags.push(`运营: ${state.op}`);
+  if(state.campaign) tags.push(`系列: ${state.campaignName}`);
+  const el=document.getElementById('active-tags');
+  el.innerHTML=tags.map((t,i)=>`<span class="tag">${t} <b data-i="${i}">✕</b></span>`).join('');
+  el.querySelectorAll('b').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;
+    if(tags[i].startsWith('品线')){state.pl='';pending.pl='';document.getElementById('f-pl').value='';}
+    else if(tags[i].startsWith('类型')){state.type='';pending.type='';document.getElementById('f-type').value='';}
+    else if(tags[i].startsWith('负责人')){state.owner='';pending.owner='';document.getElementById('f-owner').value='';}
+    else if(tags[i].startsWith('运营')){state.op='';pending.op='';document.getElementById('f-op').value='';}
+    else if(tags[i].startsWith('系列')){state.campaign='';state.campaignName='';state.container='';state.containerName='';state.containerType='';}
+    renderAll();
+  });
+}
+
+// ---------- master render ----------
+function renderAll(){
+  document.getElementById('daterange').textContent=`${state.start} ~ ${state.end}`;
+  renderKPI(); renderTrend(); renderTypePie();
+  renderCampaignTable(); renderNewOldTable(); renderKeywordTable(); renderPlTable(); renderCompare(); renderAnomaly(); renderTags();
+  renderCrumb(); renderDrill();
+}
+
+// ---------- CSV 导出（导出当前筛选+排序后的表格）----------
+function exportTable(tableId, name){
+  const table=document.getElementById(tableId);
+  if(!table) return;
+  const rows=[...table.querySelectorAll('tr')];
+  const csv=rows.map(tr=>[...tr.querySelectorAll('th,td')].map(td=>{
+    let t=(td.innerText||'').replace(/\s+/g,' ').trim();
+    if(t.indexOf(',')>=0 || t.indexOf('"')>=0 || t.indexOf('\n')>=0) t='"'+t.replace(/"/g,'""')+'"';
+    return t;
+  }).join(',')).join('\r\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  const d=new Date().toISOString().slice(0,10);
+  a.href=URL.createObjectURL(blob);
+  a.download=`${name}_${state.start}_${state.end}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function exportKeywordAll(){
+  const rows=getKwRows();
+  if(!rows.length){ alert('当前无搜索字词数据'); return; }
+  const head=['搜索字词','花费','转化价值','ROI','CPC','CPA','转化次数','转化率','点击率','展示次数'];
+  const body=rows.map(r=>[r.term,
+    r.cost.toFixed(2),r.val.toFixed(2),r.roi.toFixed(2),r.cpc.toFixed(2),r.cpa.toFixed(2),
+    r.conv.toFixed(2),(r.cvr*100).toFixed(2)+'%',(r.ctr*100).toFixed(2)+'%',r.imp]);
+  const csv=[head,...body].map(a=>a.map(v=>{let t=String(v);
+    if(t.indexOf(',')>=0||t.indexOf('"')>=0||t.indexOf('\n')>=0) t='"'+t.replace(/"/g,'""')+'"';
+    return t;}).join(',')).join('\r\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`关键词分析_Top100_${state.start||''}_${state.end||''}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function exportNewOld(){ exportTable('newoldTable','新老广告环比'); }
+
+// ---------- init UI ----------
+function syncFiltersToPending(){
+  document.getElementById('f-pl').value=pending.pl;
+  document.getElementById('f-type').value=pending.type;
+  document.getElementById('f-owner').value=pending.owner;
+  document.getElementById('f-op').value=pending.op;
+  document.getElementById('f-start').value=pending.start;
+  document.getElementById('f-end').value=pending.end;
+  document.getElementById('f-cmp').checked=pending.cmpOn;
+  document.getElementById('f-cstart').value=pending.cstart;
+  document.getElementById('f-cend').value=pending.cend;
+}
+function initFilters(){
+  const pls=[...new Set(D.campaigns.map(r=>r.pl))].sort();
+  const types=[...new Set(D.campaigns.map(r=>r.type))].sort();
+  const owners=[...new Set(D.campaigns.map(r=>r.owner).filter(x=>x))].sort();
+  const ops=[...new Set(D.campaigns.map(r=>r.op).filter(x=>x))].sort();
+  const pf=document.getElementById('f-pl'), tf=document.getElementById('f-type'), of=document.getElementById('f-owner'), opf=document.getElementById('f-op');
+  pls.forEach(p=>pf.add(new Option(p,p)));
+  types.forEach(t=>tf.add(new Option(t,t)));
+  owners.forEach(o=>of.add(new Option(o,o)));
+  ops.forEach(o=>opf.add(new Option(o,o)));
+  syncFiltersToPending();
+  setCmpDisabled();
+  pf.onchange=e=>{pending.pl=e.target.value;};
+  tf.onchange=e=>{pending.type=e.target.value;};
+  of.onchange=e=>{pending.owner=e.target.value;};
+  opf.onchange=e=>{pending.op=e.target.value;};
+  function recalcCompare(){
+    if(pending.cmpOn && pending.start && pending.end){
+      const s=new Date(pending.start+'T00:00:00'), e=new Date(pending.end+'T00:00:00');
+      const days=Math.round((e-s)/86400000)+1;
+      const pe=new Date(s); pe.setDate(pe.getDate()-1);
+      const ps=new Date(pe); ps.setDate(ps.getDate()-days+1);
+      pending.cstart=fmtLocalDate(ps);
+      pending.cend=fmtLocalDate(pe);
+      syncFiltersToPending();
+    }
+  }
+  document.getElementById('f-start').onchange=e=>{pending.start=e.target.value; recalcCompare(); Object.assign(state,pending); renderAll();};
+  document.getElementById('f-end').onchange=e=>{pending.end=e.target.value; recalcCompare(); Object.assign(state,pending); renderAll();};
+  function setCmpDisabled(){
+    document.getElementById('f-cstart').disabled = !pending.cmpOn;
+    document.getElementById('f-cend').disabled = !pending.cmpOn;
+  }
+  document.getElementById('f-cmp').onchange=e=>{
+    pending.cmpOn=e.target.checked;
+    recalcCompare();
+    setCmpDisabled();
+    Object.assign(state, pending);
+    renderAll();
+  };
+  document.getElementById('f-cstart').onchange=e=>{pending.cstart=e.target.value; if(pending.cmpOn){Object.assign(state,pending); renderAll();}};
+  document.getElementById('f-cend').onchange=e=>{pending.cend=e.target.value; if(pending.cmpOn){Object.assign(state,pending); renderAll();}};
+  document.getElementById('f-query').onclick=()=>{
+    Object.assign(state, pending);
+    renderAll();
+  };
+  document.getElementById('f-clear').onclick=()=>{
+    resetDrill();
+    state.pl='';state.type='';state.owner='';state.op='';state.campaign='';state.campaignName='';
+    pending.pl='';pending.type='';pending.owner='';pending.op='';pending.campaign='';pending.campaignName='';
+    applyDateDefault();
+    syncFiltersToPending();
+    renderAll();
+  };
+}
+
+// trend metric switch
+document.getElementById('trend-hint').style.cursor='pointer';
+document.getElementById('trend-hint').onclick=()=>{
+  if(trendCross){ trendCross=false; updateTrendHint(); renderTrend(); return; }
+  const keys=['cost','val','roi','conv','imp','clk'];
+  trendMetric=keys[(keys.indexOf(trendMetric)+1)%keys.length];
+  updateTrendHint();
+  renderTrend();
+};
+
+trendChart=echarts.init(document.getElementById('trend'));
+typeChart=echarts.init(document.getElementById('typePie'));
+typeChart.on('click',p=>{ if(p.name){ const v=state.type===p.name?'':p.name; state.type=pending.type=v; document.getElementById('f-type').value=v; resetDrill(); renderAll(); }});
+
+// 交叉视图切换
+document.getElementById('trend-cross').onclick=()=>{
+  trendCross=!trendCross;
+  updateTrendHint();
+  renderTrend();
+};
+updateTrendHint();
+
+window.addEventListener('resize',()=>{trendChart.resize();typeChart.resize();});
+
+// ---------- auction (竞品分析 / 竞价洞察) ----------
+const aucState = {kind:'shopping', month:''};
+let aucTrendChart, aucRankChart;
+const AUC_COLORS = ['#2f6bff','#7a5af5','#1ea672','#f5a623','#e255a1','#16a3b8','#d97706','#0ea5e9','#84cc16','#ef4444','#8b5cf6','#14b8a6'];
+function aucColor(i){ return AUC_COLORS[i % AUC_COLORS.length]; }
+
+function aucData(){ return D.auction[aucState.kind]; }
+function aucMonths(){ return [...new Set(aucData().map(r=>r.monthKey))].sort(); }
+function aucByDomain(){
+  const m={};
+  aucData().forEach(r=>{ (m[r.domain]=m[r.domain]||[]).push(r); });
+  Object.values(m).forEach(a=>a.sort((x,y)=>x.monthKey.localeCompare(y.monthKey)));
+  return m;
+}
+function aucColumnDef(){
+  if(aucState.kind==='shopping')
+    return [['impShare','展示份额'],['overlap','重叠率'],['outrank','排名胜出率']];
+  return [['impShare','展示份额'],['overlap','重叠率'],['positionAbove','排名被超越率'],['topPage','页首展示率'],['absTop','绝对页首展示率'],['outrank','排名胜出率']];
+}
+function aucLatest(){ const ms=aucMonths(); return ms[ms.length-1]; }
+
+function renderAucTrend(){
+  const months=aucMonths();
+  const byD=aucByDomain();
+  const comps=Object.entries(byD).filter(([d])=>d!=='您');
+  comps.forEach(([d,arr])=>{ arr._avg=arr.reduce((s,r)=>s+(r.impShare||0),0)/arr.length; });
+  comps.sort((a,b)=>b[1]._avg-a[1]._avg);
+  const top=comps.slice(0,6).map(x=>x[0]);
+  const series=[];
+  const youArr=byD['您']||[];
+  const youMap={}; youArr.forEach(r=>youMap[r.monthKey]=r.impShare);
+  series.push({name:'您(本店)',type:'line',smooth:true,
+    data:months.map(mk=>youMap[mk]!=null?+(youMap[mk]*100).toFixed(2):null),
+    itemStyle:{color:'#e23d3d'},lineStyle:{width:3},z:5,symbolSize:5});
+  top.forEach((d,i)=>{
+    const mp={}; byD[d].forEach(r=>mp[r.monthKey]=r.impShare);
+    series.push({name:d,type:'line',smooth:true,symbol:'none',
+      data:months.map(mk=>mp[mk]!=null?+(mp[mk]*100).toFixed(2):null),
+      itemStyle:{color:aucColor(i)},lineStyle:{width:1.5}});
+  });
+  aucTrendChart.setOption({
+    tooltip:{trigger:'axis',valueFormatter:v=>v==null?'—':v+'%'},
+    legend:{type:'scroll',top:0,textStyle:{fontSize:10}},
+    grid:{left:46,right:14,top:42,bottom:46},
+    xAxis:{type:'category',data:months,axisLabel:{fontSize:9,rotate:45}},
+    yAxis:{type:'value',axisLabel:{fontSize:10,formatter:'{value}%'},name:'展示份额',nameTextStyle:{fontSize:10}},
+    series
+  },true);
+}
+function renderAucRank(){
+  const lm=aucState.month || aucLatest();
+  const byD=aucByDomain();
+  let rows=Object.entries(byD).map(([d,arr])=>{
+    const rec=arr.find(r=>r.monthKey===lm);
+    return {domain:d, imp: rec?rec.impShare:null};
+  }).filter(x=>x.imp!=null);
+  rows.sort((a,b)=>b.imp-a.imp);
+  const top=rows.slice(0,14);
+  document.getElementById('auc-rank-hint').textContent=`${lm} · Top ${top.length}`;
+  const names=[...top].reverse().map(x=>x.domain);
+  const vals=[...top].reverse().map(x=>+(x.imp*100).toFixed(2));
+  aucRankChart.setOption({
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},valueFormatter:v=>v+'%'},
+    grid:{left:150,right:34,top:10,bottom:20},
+    xAxis:{type:'value',axisLabel:{fontSize:10,formatter:'{value}%'}},
+    yAxis:{type:'category',data:names,axisLabel:{fontSize:10}},
+    series:[{type:'bar',data:vals.map((v,i)=>({value:v,itemStyle:{color:names[i]==='您'?'#e23d3d':'#2f6bff'}})),
+      barWidth:'62%',label:{show:true,position:'right',fontSize:10,formatter:'{c}%'}}]
+  },true);
+}
+function renderAucTable(){
+  const lm=aucState.month || aucLatest();
+  const byD=aucByDomain();
+  const cols=aucColumnDef();
+  const head=['竞品/域名',...cols.map(c=>c[1])];
+  document.querySelector('#aucTable thead').innerHTML='<tr>'+head.map((h,i)=>`<th ${i===0?'data-k="domain"':'data-k="'+cols[i-1][0]+'"'}>${h}</th>`).join('')+'</tr>';
+  let rows=Object.entries(byD).map(([d,arr])=>{
+    const rec=arr.find(r=>r.monthKey===lm) || {};
+    return {domain:d, ...rec};
+  });
+  const fmtP=v=>v==null?'—':(v*100).toFixed(2)+'%';
+  const fmtCell=(key,o)=>{
+    if(key==='impShare' && o.impShare==null && o.impShareRaw && o.impShareRaw.startsWith('<'))
+      return o.impShareRaw;            // 展示原始 '< 10%' 文本，避免误导为精确值
+    return fmtP(o[key]);
+  };
+  const paint=()=>{
+    rows.sort((a,b)=>{
+      if(a.domain==='您') return -1; if(b.domain==='您') return 1;
+      return (b.impShare||0)-(a.impShare||0);
+    });
+    document.querySelector('#aucTable tbody').innerHTML=rows.map(o=>{
+      const isYou=o.domain==='您';
+      return `<tr ${isYou?'style="background:#fff7f7;font-weight:600"':''}>
+        <td>${o.domain}</td>${cols.map(c=>`<td>${fmtCell(c[0],o)}</td>`).join('')}</tr>`;
+    }).join('');
+  };
+  paint();
+  document.getElementById('auc-table-hint').textContent=`${lm} · 共 ${rows.length} 个参与方（点表头按指标排序）`;
+  document.querySelectorAll('#aucTable th[data-k]').forEach(th=>th.onclick=()=>{
+    const k=th.dataset.k; if(k==='domain') return;
+    rows.sort((a,b)=>(b[k]||0)-(a[k]||0));
+    document.querySelector('#aucTable tbody').innerHTML=rows.map(o=>{
+      const isYou=o.domain==='您';
+      return `<tr ${isYou?'style="background:#fff7f7;font-weight:600"':''}>
+        <td>${o.domain}</td>${cols.map(c=>`<td>${fmtCell(c[0],o)}</td>`).join('')}</tr>`;
+    }).join('');
+  });
+}
+function renderAucAll(){
+  renderAucTrend(); renderAucRank(); renderAucTable();
+  const byD=aucByDomain();
+  const nComp=Object.keys(byD).filter(d=>d!=='您').length;
+  document.getElementById('auc-hint').textContent=`${aucState.kind==='shopping'?'购物广告':'搜索广告'} · ${aucMonths().length} 个月 · ${nComp} 个竞品域名`;
+}
+function fillAucMonth(){
+  const ms=aucMonths(); const lm=ms[ms.length-1];
+  if(!aucState.month || !ms.includes(aucState.month)) aucState.month=lm;
+  document.getElementById('auc-month').innerHTML=ms.map(m=>`<option value="${m}" ${m===aucState.month?'selected':''}>${m}</option>`).join('');
+}
+function initAuction(){
+  aucTrendChart=echarts.init(document.getElementById('aucTrend'));
+  aucRankChart=echarts.init(document.getElementById('aucRank'));
+  const sel=document.getElementById('auc-type');
+  sel.value=aucState.kind;
+  sel.onchange=e=>{aucState.kind=e.target.value; fillAucMonth(); renderAucAll();};
+  fillAucMonth();
+  document.getElementById('auc-month').onchange=e=>{aucState.month=e.target.value; renderAucRank(); renderAucTable();};
+  renderAucAll();
+}
+window.addEventListener('resize',()=>{ if(aucTrendChart)aucTrendChart.resize(); if(aucRankChart)aucRankChart.resize(); });
+
+// ---------- 授权门禁（邮箱模式 / 共享码模式） ----------
+function b64ToBytes(b64){
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  return arr;
+}
+async function sha256Hex(s){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function decryptPayload(blob, code){  // 共享码模式
+  const bytes = b64ToBytes(blob);
+  const salt = bytes.slice(0,16);
+  const nonce = bytes.slice(16,28);
+  const ct = bytes.slice(28);
+  const baseKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(code), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:200000, hash:'SHA-256'}, baseKey, {name:'AES-GCM', length:256}, false, ['decrypt']);
+  const plain = await crypto.subtle.decrypt({name:'AES-GCM', iv:nonce}, key, ct);
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+async function unlockEmail(payload, email, code){  // 信封加密：用该邮箱专属授权码解开 dataKey，再解密数据
+  const h = await sha256Hex(payload.pub + email.toLowerCase());
+  const entry = (payload.allowed||[]).find(e=>e.h===h);
+  if(!entry) throw new Error('not_authorized');
+  const raw = b64ToBytes(entry.w);
+  const salt = raw.slice(0,16), nonce = raw.slice(16,28), wrapped = raw.slice(28);
+  const baseKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(code), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:200000, hash:'SHA-256'}, baseKey, {name:'AES-GCM', length:256}, false, ['decrypt']);
+  let dataKey;
+  try { dataKey = await crypto.subtle.decrypt({name:'AES-GCM', iv:nonce}, key, wrapped); }
+  catch(e){ throw new Error('bad_code'); }
+  const dk = await crypto.subtle.importKey('raw', dataKey, 'AES-GCM', false, ['decrypt']);
+  const draw = b64ToBytes(payload.ct);
+  const dnonce = draw.slice(0,12), dct = draw.slice(12);
+  const plain = await crypto.subtle.decrypt({name:'AES-GCM', iv:dnonce}, dk, dct);
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+async function loadPayload(){
+  if(PAYLOAD && PAYLOAD.url){
+    const url = PAYLOAD.url + (PAYLOAD.url.indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now();
+    const r = await fetch(url, {cache: 'no-store'});
+    if(!r.ok) throw new Error('数据加载失败: '+r.status);
+    if(PAYLOAD.mode === 'gz'){
+      const buf = await r.arrayBuffer();
+      const ds = new DecompressionStream('gzip');
+      const stream = new Response(buf).body.pipeThrough(ds);
+      const decompressed = await new Response(stream).arrayBuffer();
+      return JSON.parse(new TextDecoder().decode(decompressed));
+    }
+    return await r.json();
+  }
+  return PAYLOAD;
+}
+function decodeArrays(data){
+  if(!data) return data;
+  for(const key in data){
+    const val = data[key];
+    if(val && typeof val==='object' && !Array.isArray(val) && Array.isArray(val._k) && Array.isArray(val._r)){
+      const keys = val._k, rows = val._r;
+      data[key] = rows.map(function(row){
+        const obj = {};
+        for(let i=0;i<keys.length;i++) obj[keys[i]] = row[i];
+        return obj;
+      });
+    }
+  }
+  return data;
+}
+function showGate(payload){
+  const isEmail = payload.mode==='email';
+  const ov = document.createElement('div');
+  ov.id='gate';
+  ov.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.94);font-family:-apple-system,Segoe UI,Roboto,sans-serif;';
+  const fields = isEmail
+    ? `<input id="gateEmail" type="email" placeholder="授权邮箱" autocomplete="off" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;outline:none;margin-bottom:10px;"/>
+       <input id="gateCode" type="password" placeholder="授权码" autocomplete="off" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;outline:none;"/>`
+    : `<input id="gateCode" type="password" placeholder="请输入访问码" autocomplete="off" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;outline:none;"/>`;
+  ov.innerHTML=`
+    <div style="background:#fff;border-radius:16px;padding:34px 30px;width:380px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.45);text-align:center;">
+      <div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:4px;">EVILENERGY 数据看板</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:22px;">${isEmail?'受限内容 · 请输入授权邮箱与授权码':'受限内容 · 需要授权访问'}</div>
+      ${fields}
+      <div id="gateErr" style="color:#dc2626;font-size:12px;height:16px;margin:9px 0 2px;"></div>
+      <button id="gateBtn" style="width:100%;padding:12px;border:none;border-radius:10px;background:#4f46e5;color:#fff;font-size:15px;font-weight:700;cursor:pointer;">解锁查看</button>
+      <div id="gateStat" style="color:#64748b;font-size:12px;margin-top:14px;height:16px;"></div>
+    </div>`;
+  document.body.appendChild(ov);
+  const btn=ov.querySelector('#gateBtn'), err=ov.querySelector('#gateErr'), stat=ov.querySelector('#gateStat');
+  const emailInp=ov.querySelector('#gateEmail'), codeInp=ov.querySelector('#gateCode');
+  if(emailInp) emailInp.focus(); else codeInp.focus();
+  async function tryUnlock(){
+    btn.disabled=true; err.textContent=''; stat.textContent='正在验证…';
+    try{
+      let data;
+      if(isEmail){
+        const email=emailInp.value.trim().toLowerCase(), code=codeInp.value.trim();
+        if(!email||!code){ err.textContent='请输入邮箱和授权码'; btn.disabled=false; stat.textContent=''; return; }
+        data = await unlockEmail(payload, email, code);
+      } else {
+        const code=codeInp.value.trim();
+        if(!code){ err.textContent='请输入访问码'; btn.disabled=false; stat.textContent=''; return; }
+        data = await decryptPayload(payload.blob, code);
+      }
+      ov.remove(); startApp(data);
+    }catch(e){
+      btn.disabled=false; stat.textContent='';
+      if(isEmail && e && e.message==='not_authorized') err.textContent='该邮箱未被授权，请联系管理员';
+      else if(isEmail) err.textContent='邮箱或授权码错误';
+      else err.textContent='访问码错误或无权限';
+    }
+  }
+  btn.onclick=tryUnlock;
+  ov.addEventListener('keydown',e=>{ if(e.key==='Enter') tryUnlock(); });
+}
+function boot(){
+  applyDateDefault();
+  initFilters();
+  initAuction();
+  renderAll();
+}
+function startApp(data){
+  decodeArrays(data);
+  DASHBOARD_DATA = data;
+  D = data;
+  allDates = [...new Set(D.campaigns.map(r=>r.date))].sort();
+  // 品线集合（用于 alignPl 回退：product_type 同名即品线）
+  D.PL_SET = new Set(D.campaigns.map(r=>r.pl).filter(Boolean));
+  // 品线 -> 原始 Shopify product_type 反查表（服务端已构建好）
+  window.PL_TO_PTS = D.PL_TO_PTS || {};
+  // 保留兼容：如果服务端没给，用 ptToPl 兜底
+  if(!Object.keys(window.PL_TO_PTS).length && D.ptToPl){
+    window.PL_TO_PTS = {};
+    Object.entries(D.ptToPl).forEach(([pt,pl])=>{
+      if(!pl) return;
+      (window.PL_TO_PTS[pl] = window.PL_TO_PTS[pl] || []).push(pt);
+    });
+  }
+  boot();
+}
+
+// 按日期区间汇总日粒度数据：arr = [[日期, 销售额, 订单数], ...]
+function sumDaily(arr, s, e){
+  let sales=0, orders=0;
+  if(arr){
+    for(const row of arr){
+      const d = row[0];
+      if(d>=s && d<=e){ sales += row[1]; orders += row[2]; }
+    }
+  }
+  return {sales, orders};
+}
+(async function(){
+  window._iifeStarted = true;
+  try{
+    const real = await loadPayload();
+    window._iifePayloadMode = real && real.mode;
+    const ov = document.getElementById('loading-overlay');
+    if(ov) ov.remove();
+    if(real.mode==='plain') startApp(real.data);
+    else showGate(real);
+    window._iifeDone = true;
+  }catch(e){
+    const ov = document.getElementById('loading-overlay');
+    if(ov) ov.remove();
+    const err = document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.94);color:#fff;font-family:sans-serif;padding:20px;text-align:center;';
+    ov.innerHTML=`<div><div style="font-size:18px;font-weight:700;margin-bottom:10px;">加载失败</div><div style="font-size:13px;opacity:.85;">${e.message}</div><div style="margin-top:14px;font-size:12px;opacity:.6;">请刷新重试，或联系管理员</div></div>`;
+    document.body.appendChild(ov);
+  }
+})();
+</script>
+</body>
+</html>

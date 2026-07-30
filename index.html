@@ -301,7 +301,7 @@
 </div>
 
 <script>
-const PAYLOAD = {"mode": "gz", "url": "data.json?v=202607301213"};
+const PAYLOAD = {"mode": "gz", "url": "data.json?v=202607301229"};
 let DASHBOARD_DATA = null;
 let D = null;
 
@@ -906,8 +906,16 @@ function renderPlTable(){
   arr=sortableRows(arr,plSortKey,plSortDir);
   document.querySelector('#plTable tbody').innerHTML=arr.map(o=>{
     const prev=prevMap[o.pl]||{};
-    const owner=(D.owners[o.pl]||{}).owner||'—';
-    const op=(D.owners[o.pl]||{}).op||'—';
+    // 负责人/运营人员从当前过滤后的 campaign 行里取 dominant（而非静态品线映射），
+    // 保证按广告负责人筛选后，品线汇总行显示的负责人与筛选条件一致。
+    const rs=byPlCur[o.pl]||[];
+    const top = (k)=>{
+      const c={};
+      rs.forEach(r=>{ c[r[k]]=(c[r[k]]||0)+1; });
+      return Object.entries(c).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
+    };
+    const owner=top('owner');
+    const op=top('op');
     return `<tr data-pl="${o.pl}"><td>${o.pl}</td><td>${owner}</td><td>${op}</td>${metricCells(o,prev,grandCur,grandPrev)}</tr>`;
   }).join('');
   document.querySelectorAll('#plTable tbody tr').forEach(tr=>tr.onclick=()=>{

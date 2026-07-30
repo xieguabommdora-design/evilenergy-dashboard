@@ -301,7 +301,7 @@
 </div>
 
 <script>
-const PAYLOAD = {"mode": "gz", "url": "data.json?v=202607301410"};
+const PAYLOAD = {"mode": "gz", "url": "data.json?v=202607301510"};
 let DASHBOARD_DATA = null;
 let D = null;
 
@@ -896,13 +896,18 @@ function renderDrillSku(card, title, head, tb, isPmax){
 function renderPlTable(){
   const curRows=filterRows(D.campaigns), prevRows=filterRowsPrev(D.campaigns);
   const grandCur=agg(curRows), grandPrev=agg(prevRows);
+  // 品线汇总的 COST%/转化价值% 分母用整个账户（不受品线/系列/负责人筛选影响）的合计
+  const cp = getComparePeriod();
+  const [ps, pe] = [cp.d0, cp.d1];
+  const acctCur = agg(D.campaigns.filter(r=> inRange(r.date, state.start, state.end)));
+  const acctPrev = agg(D.campaigns.filter(r=> inRange(r.date, ps, pe)));
   const byPlCur={}, byPlPrev={};
   curRows.forEach(r=>{ byPlCur[r.pl]=byPlCur[r.pl]||[]; byPlCur[r.pl].push(r); });
   prevRows.forEach(r=>{ byPlPrev[r.pl]=byPlPrev[r.pl]||[]; byPlPrev[r.pl].push(r); });
   let arr=Object.entries(byPlCur).map(([pl,rs])=>({pl,...agg(rs)}));
-  arr.forEach(o=>{ o.costShare=grandCur.cost?o.cost/grandCur.cost:0; o.gmvShare=grandCur.val?o.val/grandCur.val:0; });
+  arr.forEach(o=>{ o.costShare=acctCur.cost?o.cost/acctCur.cost:0; o.gmvShare=acctCur.val?o.val/acctCur.val:0; });
   const prevMap={};
-  Object.entries(byPlPrev).forEach(([pl,rs])=>{ const p={pl,...agg(rs)}; p.costShare=grandPrev.cost?p.cost/grandPrev.cost:0; p.gmvShare=grandPrev.val?p.val/grandPrev.val:0; prevMap[pl]=p; });
+  Object.entries(byPlPrev).forEach(([pl,rs])=>{ const p={pl,...agg(rs)}; p.costShare=acctPrev.cost?p.cost/acctPrev.cost:0; p.gmvShare=acctPrev.val?p.val/acctPrev.val:0; prevMap[pl]=p; });
   arr=sortableRows(arr,plSortKey,plSortDir);
   document.querySelector('#plTable tbody').innerHTML=arr.map(o=>{
     const prev=prevMap[o.pl]||{};
@@ -916,7 +921,7 @@ function renderPlTable(){
     };
     const owner=top('owner');
     const op=top('op');
-    return `<tr data-pl="${o.pl}"><td>${o.pl}</td><td>${owner}</td><td>${op}</td>${metricCells(o,prev,grandCur,grandPrev)}</tr>`;
+    return `<tr data-pl="${o.pl}"><td>${o.pl}</td><td>${owner}</td><td>${op}</td>${metricCells(o,prev,acctCur,acctPrev)}</tr>`;
   }).join('');
   document.querySelectorAll('#plTable tbody tr').forEach(tr=>tr.onclick=()=>{
     const v = state.pl===tr.dataset.pl? '' : tr.dataset.pl;

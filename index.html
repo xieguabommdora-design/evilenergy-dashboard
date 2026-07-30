@@ -95,7 +95,7 @@
   <header>
     <div>
       <h1>谷歌全链路看板</h1>
-      <div class="sub">Evil Energy · ievilenergy.myshopify.com · 数据区间 <span id="daterange"></span> · ROI 为平台口径(Google Ads 转化价值)</div>
+      <div class="sub">Evil Energy · ievilenergy.myshopify.com · 数据区间 <span id="daterange"></span> · 转化价值/ROI 均为 Google Ads 平台口径（非 Shopify GMV）</div>
     </div>
     <div style="font-size:11px;color:var(--sub)">点击品线 / 类型 / 系列行即可联动筛选 · 数据来自 Google Ads API 自动拉取</div>
   </header>
@@ -301,7 +301,7 @@
 </div>
 
 <script>
-const PAYLOAD = {"mode": "gz", "url": "data.json?v=202607301200"};
+const PAYLOAD = {"mode": "gz", "url": "data.json?v=202607301207"};
 let DASHBOARD_DATA = null;
 let D = null;
 
@@ -497,7 +497,7 @@ function renderKPI(){
 
   document.getElementById('kpis').innerHTML =
     pnl('总花费',cur.cost,prev.cost,fmtMoney) +
-    pnl('转化价值(GMV口径)',cur.val,prev.val,fmtMoney) +
+    pnl('转化价值(广告后台)',cur.val,prev.val,fmtMoney) +
     pnl('ROI',cur.roi,prev.roi,v=>v.toFixed(2),true) +
     pnl('转化次数',cur.conv,prev.conv,fmtNum) +
     pnl('客单价(AOV)',aov,aovP,fmtMoney) +

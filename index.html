@@ -144,7 +144,7 @@
           <th>系列数</th>
           <th>ROI-本期</th><th>ROI-上期</th><th>ROI-环比</th>
           <th>COST-本期</th><th>COST-上期</th><th>COST-环比</th>
-          <th>GMV-本期</th><th>GMV-上期</th><th>GMV-环比</th>
+          <th>转化价值-本期</th><th>转化价值-上期</th><th>转化价值-环比</th>
           <th>CPC-本期</th><th>CPC-上期</th><th>CPC-环比</th>
           <th>CVR-本期</th><th>CVR-上期</th><th>CVR-环比</th>
           <th>CTR-本期</th><th>CTR-上期</th><th>CTR-环比</th>
@@ -153,7 +153,7 @@
           <th>客单价-本期</th><th>客单价-上期</th><th>客单价-环比</th>
           <th>展示次数-本期</th><th>展示次数-上期</th><th>展示次数-环比</th>
           <th>COST%-本期</th><th>COST%-上期</th><th>COST%-差额</th>
-          <th>GMV%-本期</th><th>GMV%-上期</th><th>GMV%-差额</th>
+          <th>转化价值%-本期</th><th>转化价值%-上期</th><th>转化价值%-差额</th>
         </tr></thead>
         <tbody></tbody>
       </table>
@@ -172,7 +172,7 @@
             <th data-k="op">运营人员</th>
             <th data-k="roi">ROI-本期</th><th>ROI-上期</th><th>ROI-环比</th>
             <th data-k="cost">COST-本期</th><th>COST-上期</th><th>COST-环比</th>
-            <th data-k="val">GMV-本期</th><th>GMV-上期</th><th>GMV-环比</th>
+            <th data-k="val">转化价值-本期</th><th>转化价值-上期</th><th>转化价值-环比</th>
             <th data-k="cpc">CPC-本期</th><th>CPC-上期</th><th>CPC-环比</th>
             <th data-k="convRate">CVR-本期</th><th>CVR-上期</th><th>CVR-环比</th>
             <th data-k="ctr">CTR-本期</th><th>CTR-上期</th><th>CTR-环比</th>
@@ -181,7 +181,7 @@
             <th data-k="aov">客单价-本期</th><th>客单价-上期</th><th>客单价-环比</th>
             <th data-k="imp">展示次数-本期</th><th>展示次数-上期</th><th>展示次数-环比</th>
             <th data-k="costShare">COST%-本期</th><th>COST%-上期</th><th>COST%-差额</th>
-            <th data-k="gmvShare">GMV%-本期</th><th>GMV%-上期</th><th>GMV%-差额</th>
+            <th data-k="gmvShare">转化价值%-本期</th><th>转化价值%-上期</th><th>转化价值%-差额</th>
           </tr></thead>
           <tbody></tbody>
         </table>
@@ -201,7 +201,7 @@
             <th data-k="op">运营人员</th>
             <th data-k="roi">ROI-本期</th><th>ROI-上期</th><th>ROI-环比</th>
             <th data-k="cost">COST-本期</th><th>COST-上期</th><th>COST-环比</th>
-            <th data-k="val">GMV-本期</th><th>GMV-上期</th><th>GMV-环比</th>
+            <th data-k="val">转化价值-本期</th><th>转化价值-上期</th><th>转化价值-环比</th>
             <th data-k="cpc">CPC-本期</th><th>CPC-上期</th><th>CPC-环比</th>
             <th data-k="convRate">CVR-本期</th><th>CVR-上期</th><th>CVR-环比</th>
             <th data-k="ctr">CTR-本期</th><th>CTR-上期</th><th>CTR-环比</th>
@@ -210,7 +210,7 @@
             <th data-k="aov">客单价-本期</th><th>客单价-上期</th><th>客单价-环比</th>
             <th data-k="imp">展示次数-本期</th><th>展示次数-上期</th><th>展示次数-环比</th>
             <th data-k="costShare">COST%-本期</th><th>COST%-上期</th><th>COST%-差额</th>
-            <th data-k="gmvShare">GMV%-本期</th><th>GMV%-上期</th><th>GMV%-差额</th>
+            <th data-k="gmvShare">转化价值%-本期</th><th>转化价值%-上期</th><th>转化价值%-差额</th>
           </tr></thead>
           <tbody></tbody>
         </table>
@@ -301,7 +301,7 @@
 </div>
 
 <script>
-const PAYLOAD = {"mode": "gz", "url": "data.json?v=202607301207"};
+const PAYLOAD = {"mode": "gz", "url": "data.json?v=202607301213"};
 let DASHBOARD_DATA = null;
 let D = null;
 
@@ -482,7 +482,7 @@ function renderKPI(){
     }
     return `<div class="kpi"><div class="t">${label}</div><div class="v">${fmt(val)}</div><div class="d ${cls}">${txt}</div></div>`;
   };
-  // 销售额占比 / 花费占比：分子=当前筛选维度广告端合计；分母=当前时间区间内整个账户（不受品线/系列筛选）合计
+  // 转化价值占比 / 花费占比：分子=当前筛选维度广告端合计；分母=当前时间区间内整个账户（不受品线/系列筛选）合计
   const cp = getComparePeriod();
   const [ps,pe] = [cp.d0, cp.d1];
   const acctCur = agg(D.campaigns.filter(r=> inRange(r.date, state.start, state.end)));   // 当前时间区间·全账户
@@ -492,7 +492,7 @@ function renderKPI(){
   const costShareCur = acctCur.cost ? cur.cost/acctCur.cost : 0;
   const costSharePrev = acctPrev.cost ? prev.cost/acctPrev.cost : 0;
   const shareKpi =
-    pnl('销售额占比', salesShareCur, salesSharePrev, fmtPct) +
+    pnl('转化价值占比', salesShareCur, salesSharePrev, fmtPct) +
     pnl('花费占比', costShareCur, costSharePrev, fmtPct);
 
   document.getElementById('kpis').innerHTML =

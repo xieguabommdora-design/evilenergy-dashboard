@@ -79,8 +79,83 @@
   .btn{background:var(--brand);color:#fff;border:none;border-radius:8px;height:30px;padding:0 16px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
   .btn:hover{opacity:.92}
   .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--txt)}
+  .btn.tiny{height:24px;padding:0 10px;font-size:11px}
   .stack{display:flex;flex-direction:column;gap:14px;margin-bottom:14px}
+  .insight-band{display:grid;grid-template-columns:1.45fr 1fr;gap:14px;margin-bottom:14px}
+  .insights{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .insight{border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:8px;padding:10px 12px;background:#fff;min-height:74px}
+  .insight.r{border-left-color:var(--red)} .insight.g{border-left-color:var(--green)} .insight.y{border-left-color:var(--warn)}
+  .insight .label{font-size:11px;color:var(--sub);margin-bottom:5px}
+  .insight .name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .insight .meta{font-size:12px;color:var(--sub);margin-top:5px;line-height:1.45}
+  .health-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .health{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#f8fafc}
+  .health .t{font-size:11px;color:var(--sub)}
+  .health .v{font-size:18px;font-weight:700;margin-top:5px}
+  .health .d{font-size:11px;color:var(--sub);margin-top:4px}
+  .audience-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:10px}
+  .audience{border:1px solid var(--line);border-radius:8px;padding:11px 12px;background:#fff;min-height:128px}
+  .audience .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:7px}
+  .audience .name{font-size:14px;font-weight:700;line-height:1.35}
+  .audience .score{flex-shrink:0;border-radius:14px;background:#eef2ff;color:var(--brand);padding:3px 8px;font-size:11px;font-weight:700}
+  .audience .meta{font-size:12px;color:var(--sub);line-height:1.55}
+  .audience .action{margin-top:8px;padding-top:8px;border-top:1px dashed #e8ebf2;font-size:12px;color:#334155;line-height:1.5}
+  .audience-table-wrap{overflow:auto;max-height:320px}
+  .metric-switch{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-left:auto}
+  .metric-switch .btn{background:#fff;border:1px solid var(--line);color:var(--txt)}
+  .metric-switch .btn.active{background:var(--brand);border-color:var(--brand);color:#fff}
+  body[data-metric-view="core"] #campTable .m-ctr,
+  body[data-metric-view="core"] #campTable .m-conv,
+  body[data-metric-view="core"] #campTable .m-aov,
+  body[data-metric-view="core"] #campTable .m-imp,
+  body[data-metric-view="core"] #plTable .m-ctr,
+  body[data-metric-view="core"] #plTable .m-conv,
+  body[data-metric-view="core"] #plTable .m-aov,
+  body[data-metric-view="core"] #plTable .m-imp{display:none}
+  body[data-metric-view="traffic"] #campTable .m-roi,
+  body[data-metric-view="traffic"] #campTable .m-val,
+  body[data-metric-view="traffic"] #campTable .m-cvr,
+  body[data-metric-view="traffic"] #campTable .m-cpa,
+  body[data-metric-view="traffic"] #campTable .m-conv,
+  body[data-metric-view="traffic"] #campTable .m-aov,
+  body[data-metric-view="traffic"] #campTable .m-share,
+  body[data-metric-view="traffic"] #plTable .m-roi,
+  body[data-metric-view="traffic"] #plTable .m-val,
+  body[data-metric-view="traffic"] #plTable .m-cvr,
+  body[data-metric-view="traffic"] #plTable .m-cpa,
+  body[data-metric-view="traffic"] #plTable .m-conv,
+  body[data-metric-view="traffic"] #plTable .m-aov,
+  body[data-metric-view="traffic"] #plTable .m-share{display:none}
+  body[data-metric-view="conversion"] #campTable .m-cost,
+  body[data-metric-view="conversion"] #campTable .m-cpc,
+  body[data-metric-view="conversion"] #campTable .m-ctr,
+  body[data-metric-view="conversion"] #campTable .m-imp,
+  body[data-metric-view="conversion"] #campTable .m-share,
+  body[data-metric-view="conversion"] #plTable .m-cost,
+  body[data-metric-view="conversion"] #plTable .m-cpc,
+  body[data-metric-view="conversion"] #plTable .m-ctr,
+  body[data-metric-view="conversion"] #plTable .m-imp,
+  body[data-metric-view="conversion"] #plTable .m-share{display:none}
+  body[data-metric-view="share"] #campTable .m-roi,
+  body[data-metric-view="share"] #campTable .m-cpc,
+  body[data-metric-view="share"] #campTable .m-cvr,
+  body[data-metric-view="share"] #campTable .m-ctr,
+  body[data-metric-view="share"] #campTable .m-cpa,
+  body[data-metric-view="share"] #campTable .m-conv,
+  body[data-metric-view="share"] #campTable .m-aov,
+  body[data-metric-view="share"] #campTable .m-imp,
+  body[data-metric-view="share"] #plTable .m-roi,
+  body[data-metric-view="share"] #plTable .m-cpc,
+  body[data-metric-view="share"] #plTable .m-cvr,
+  body[data-metric-view="share"] #plTable .m-ctr,
+  body[data-metric-view="share"] #plTable .m-cpa,
+  body[data-metric-view="share"] #plTable .m-conv,
+  body[data-metric-view="share"] #plTable .m-aov,
+  body[data-metric-view="share"] #plTable .m-imp{display:none}
   @media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
+  @media(max-width:1100px){.audience-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:900px){.insight-band{grid-template-columns:1fr}.insights,.health-grid{grid-template-columns:1fr}}
+  @media(max-width:700px){.audience-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -113,12 +188,39 @@
     <div class="f"><label>对比开始</label><input type="date" id="f-cstart"></div>
     <div class="f"><label>对比结束</label><input type="date" id="f-cend"></div>
     <button class="btn" id="f-query">查询</button>
+    <div class="f"><label>指标视图</label><div class="metric-switch" id="metric-switch">
+      <button class="btn tiny active" data-view="core">核心</button>
+      <button class="btn tiny" data-view="traffic">流量</button>
+      <button class="btn tiny" data-view="conversion">转化</button>
+      <button class="btn tiny" data-view="share">占比</button>
+      <button class="btn tiny" data-view="all">全部</button>
+    </div></div>
     <div class="clear" id="f-clear">清除筛选 ✕</div>
     <div class="active-tags" id="active-tags"></div>
   </div>
 
   <div class="kpis" id="kpis"></div>
   <div id="compare-notice" style="margin:-6px 0 8px 0;font-size:12px;color:var(--accent);min-height:18px;"></div>
+
+  <div class="insight-band">
+    <div class="card">
+      <h3>经营洞察 <span class="hint">跟随当前筛选和日期区间</span></h3>
+      <div class="insights" id="insights"></div>
+    </div>
+    <div class="card">
+      <h3>数据健康度 <span class="hint">影响下钻可信度</span></h3>
+      <div class="health-grid" id="dataHealth"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>受众人群分析 <span class="hint">Google Ads 已保存报告「细分受众群-LFY」</span></h3>
+    <div class="audience-grid" id="audienceSegments"></div>
+    <div class="audience-table-wrap"><table id="audienceTable"><thead><tr>
+      <th>细分受众群</th><th>花费</th><th>转化价值</th><th>ROI</th><th>转化</th><th>点击</th><th>CTR</th><th>CVR</th>
+    </tr></thead><tbody></tbody></table></div>
+    <div class="hint" id="audienceNote"></div>
+  </div>
 
   <div class="grid">
     <div class="card">
@@ -170,18 +272,18 @@
             <th data-k="pl">品线</th>
             <th data-k="owner">广告负责人</th>
             <th data-k="op">运营人员</th>
-            <th data-k="roi">ROI-本期</th><th>ROI-上期</th><th>ROI-环比</th>
-            <th data-k="cost">COST-本期</th><th>COST-上期</th><th>COST-环比</th>
-            <th data-k="val">转化价值-本期</th><th>转化价值-上期</th><th>转化价值-环比</th>
-            <th data-k="cpc">CPC-本期</th><th>CPC-上期</th><th>CPC-环比</th>
-            <th data-k="convRate">CVR-本期</th><th>CVR-上期</th><th>CVR-环比</th>
-            <th data-k="ctr">CTR-本期</th><th>CTR-上期</th><th>CTR-环比</th>
-            <th data-k="cpa">CPA-本期</th><th>CPA-上期</th><th>CPA-环比</th>
-            <th data-k="conv">销量-本期</th><th>销量-上期</th><th>销量-环比</th>
-            <th data-k="aov">客单价-本期</th><th>客单价-上期</th><th>客单价-环比</th>
-            <th data-k="imp">展示次数-本期</th><th>展示次数-上期</th><th>展示次数-环比</th>
-            <th data-k="costShare">COST%-本期</th><th>COST%-上期</th><th>COST%-差额</th>
-            <th data-k="gmvShare">转化价值%-本期</th><th>转化价值%-上期</th><th>转化价值%-差额</th>
+            <th class="m-roi" data-k="roi">ROI-本期</th><th class="m-roi">ROI-上期</th><th class="m-roi">ROI-环比</th>
+            <th class="m-cost" data-k="cost">COST-本期</th><th class="m-cost">COST-上期</th><th class="m-cost">COST-环比</th>
+            <th class="m-val" data-k="val">转化价值-本期</th><th class="m-val">转化价值-上期</th><th class="m-val">转化价值-环比</th>
+            <th class="m-cpc" data-k="cpc">CPC-本期</th><th class="m-cpc">CPC-上期</th><th class="m-cpc">CPC-环比</th>
+            <th class="m-cvr" data-k="convRate">CVR-本期</th><th class="m-cvr">CVR-上期</th><th class="m-cvr">CVR-环比</th>
+            <th class="m-ctr" data-k="ctr">CTR-本期</th><th class="m-ctr">CTR-上期</th><th class="m-ctr">CTR-环比</th>
+            <th class="m-cpa" data-k="cpa">CPA-本期</th><th class="m-cpa">CPA-上期</th><th class="m-cpa">CPA-环比</th>
+            <th class="m-conv" data-k="conv">销量-本期</th><th class="m-conv">销量-上期</th><th class="m-conv">销量-环比</th>
+            <th class="m-aov" data-k="aov">客单价-本期</th><th class="m-aov">客单价-上期</th><th class="m-aov">客单价-环比</th>
+            <th class="m-imp" data-k="imp">展示次数-本期</th><th class="m-imp">展示次数-上期</th><th class="m-imp">展示次数-环比</th>
+            <th class="m-share" data-k="costShare">COST%-本期</th><th class="m-share">COST%-上期</th><th class="m-share">COST%-差额</th>
+            <th class="m-share" data-k="gmvShare">转化价值%-本期</th><th class="m-share">转化价值%-上期</th><th class="m-share">转化价值%-差额</th>
           </tr></thead>
           <tbody></tbody>
         </table>
@@ -199,18 +301,18 @@
             <th data-k="type">类型</th>
             <th data-k="pl">品线</th>
             <th data-k="op">运营人员</th>
-            <th data-k="roi">ROI-本期</th><th>ROI-上期</th><th>ROI-环比</th>
-            <th data-k="cost">COST-本期</th><th>COST-上期</th><th>COST-环比</th>
-            <th data-k="val">转化价值-本期</th><th>转化价值-上期</th><th>转化价值-环比</th>
-            <th data-k="cpc">CPC-本期</th><th>CPC-上期</th><th>CPC-环比</th>
-            <th data-k="convRate">CVR-本期</th><th>CVR-上期</th><th>CVR-环比</th>
-            <th data-k="ctr">CTR-本期</th><th>CTR-上期</th><th>CTR-环比</th>
-            <th data-k="cpa">CPA-本期</th><th>CPA-上期</th><th>CPA-环比</th>
-            <th data-k="conv">销量-本期</th><th>销量-上期</th><th>销量-环比</th>
-            <th data-k="aov">客单价-本期</th><th>客单价-上期</th><th>客单价-环比</th>
-            <th data-k="imp">展示次数-本期</th><th>展示次数-上期</th><th>展示次数-环比</th>
-            <th data-k="costShare">COST%-本期</th><th>COST%-上期</th><th>COST%-差额</th>
-            <th data-k="gmvShare">转化价值%-本期</th><th>转化价值%-上期</th><th>转化价值%-差额</th>
+            <th class="m-roi" data-k="roi">ROI-本期</th><th class="m-roi">ROI-上期</th><th class="m-roi">ROI-环比</th>
+            <th class="m-cost" data-k="cost">COST-本期</th><th class="m-cost">COST-上期</th><th class="m-cost">COST-环比</th>
+            <th class="m-val" data-k="val">转化价值-本期</th><th class="m-val">转化价值-上期</th><th class="m-val">转化价值-环比</th>
+            <th class="m-cpc" data-k="cpc">CPC-本期</th><th class="m-cpc">CPC-上期</th><th class="m-cpc">CPC-环比</th>
+            <th class="m-cvr" data-k="convRate">CVR-本期</th><th class="m-cvr">CVR-上期</th><th class="m-cvr">CVR-环比</th>
+            <th class="m-ctr" data-k="ctr">CTR-本期</th><th class="m-ctr">CTR-上期</th><th class="m-ctr">CTR-环比</th>
+            <th class="m-cpa" data-k="cpa">CPA-本期</th><th class="m-cpa">CPA-上期</th><th class="m-cpa">CPA-环比</th>
+            <th class="m-conv" data-k="conv">销量-本期</th><th class="m-conv">销量-上期</th><th class="m-conv">销量-环比</th>
+            <th class="m-aov" data-k="aov">客单价-本期</th><th class="m-aov">客单价-上期</th><th class="m-aov">客单价-环比</th>
+            <th class="m-imp" data-k="imp">展示次数-本期</th><th class="m-imp">展示次数-上期</th><th class="m-imp">展示次数-环比</th>
+            <th class="m-share" data-k="costShare">COST%-本期</th><th class="m-share">COST%-上期</th><th class="m-share">COST%-差额</th>
+            <th class="m-share" data-k="gmvShare">转化价值%-本期</th><th class="m-share">转化价值%-上期</th><th class="m-share">转化价值%-差额</th>
           </tr></thead>
           <tbody></tbody>
         </table>
@@ -301,7 +403,7 @@
 </div>
 
 <script>
-const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608051407"};
+const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608061004"};
 let DASHBOARD_DATA = null;
 let D = null;
 
@@ -309,6 +411,7 @@ let D = null;
 const fmtMoney = v => (v==null?'—':((v>=0?'':'-') + '$' + Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})));
 const fmtNum = v => (v==null?'—':v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
 const fmtPct = v => (v==null?'—':(v*100).toFixed(2)+'%');
+const esc = v => String(v==null?'':v).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const STATUS_LABEL = {ENABLED:'已启用', PAUSED:'已暂停', REMOVED:'已移除'};
 const TYPE_LABEL = {PERFORMANCE_MAX:'效果最大化', SEARCH:'搜索', SHOPPING:'购物',
   DEMAND_GEN:'需求开发', DISPLAY:'展示', VIDEO:'视频',
@@ -360,23 +463,24 @@ function metricCells(cur,prev,grandCur,grandPrev){
   const costDiff=fmtShareDiff(costShareCur,costSharePrev,false);
   const gmvDiff=fmtShareDiff(gmvShareCur,gmvSharePrev,true);
   return `
-    <td>${cur.roi.toFixed(2)}</td><td>${fmtNum(prevObj.roi)}</td><td class="${roiChg.cls}">${roiChg.text}</td>
-    <td>${fmtMoney(cur.cost)}</td><td>${fmtMoney(prevObj.cost)}</td><td class="${costChg.cls}">${costChg.text}</td>
-    <td>${fmtMoney(cur.val)}</td><td>${fmtMoney(prevObj.val)}</td><td class="${gmvChg.cls}">${gmvChg.text}</td>
-    <td>${fmtMoney(cur.cpc)}</td><td>${fmtMoney(prevObj.cpc)}</td><td class="${cpcChg.cls}">${cpcChg.text}</td>
-    <td>${fmtPct(cur.convRate)}</td><td>${fmtPct(prevObj.convRate)}</td><td class="${cvrChg.cls}">${cvrChg.text}</td>
-    <td>${fmtPct(cur.ctr)}</td><td>${fmtPct(prevObj.ctr)}</td><td class="${ctrChg.cls}">${ctrChg.text}</td>
-    <td>${fmtMoney(cur.cpa)}</td><td>${fmtMoney(prevObj.cpa)}</td><td class="${cpaChg.cls}">${cpaChg.text}</td>
-    <td>${fmtNum(cur.conv)}</td><td>${fmtNum(prevObj.conv)}</td><td class="${convChg.cls}">${convChg.text}</td>
-    <td>${fmtMoney(cur.aov)}</td><td>${fmtMoney(prevObj.aov)}</td><td class="${aovChg.cls}">${aovChg.text}</td>
-    <td>${fmtNum(cur.imp)}</td><td>${fmtNum(prevObj.imp)}</td><td class="${impChg.cls}">${impChg.text}</td>
-    <td>${fmtPct(costShareCur)}</td><td>${fmtPct(costSharePrev)}</td><td class="${costDiff.cls}">${costDiff.text}</td>
-    <td>${fmtPct(gmvShareCur)}</td><td>${fmtPct(gmvSharePrev)}</td><td class="${gmvDiff.cls}">${gmvDiff.text}</td>`;
+    <td class="m-roi">${cur.roi.toFixed(2)}</td><td class="m-roi">${fmtNum(prevObj.roi)}</td><td class="m-roi ${roiChg.cls}">${roiChg.text}</td>
+    <td class="m-cost">${fmtMoney(cur.cost)}</td><td class="m-cost">${fmtMoney(prevObj.cost)}</td><td class="m-cost ${costChg.cls}">${costChg.text}</td>
+    <td class="m-val">${fmtMoney(cur.val)}</td><td class="m-val">${fmtMoney(prevObj.val)}</td><td class="m-val ${gmvChg.cls}">${gmvChg.text}</td>
+    <td class="m-cpc">${fmtMoney(cur.cpc)}</td><td class="m-cpc">${fmtMoney(prevObj.cpc)}</td><td class="m-cpc ${cpcChg.cls}">${cpcChg.text}</td>
+    <td class="m-cvr">${fmtPct(cur.convRate)}</td><td class="m-cvr">${fmtPct(prevObj.convRate)}</td><td class="m-cvr ${cvrChg.cls}">${cvrChg.text}</td>
+    <td class="m-ctr">${fmtPct(cur.ctr)}</td><td class="m-ctr">${fmtPct(prevObj.ctr)}</td><td class="m-ctr ${ctrChg.cls}">${ctrChg.text}</td>
+    <td class="m-cpa">${fmtMoney(cur.cpa)}</td><td class="m-cpa">${fmtMoney(prevObj.cpa)}</td><td class="m-cpa ${cpaChg.cls}">${cpaChg.text}</td>
+    <td class="m-conv">${fmtNum(cur.conv)}</td><td class="m-conv">${fmtNum(prevObj.conv)}</td><td class="m-conv ${convChg.cls}">${convChg.text}</td>
+    <td class="m-aov">${fmtMoney(cur.aov)}</td><td class="m-aov">${fmtMoney(prevObj.aov)}</td><td class="m-aov ${aovChg.cls}">${aovChg.text}</td>
+    <td class="m-imp">${fmtNum(cur.imp)}</td><td class="m-imp">${fmtNum(prevObj.imp)}</td><td class="m-imp ${impChg.cls}">${impChg.text}</td>
+    <td class="m-share">${fmtPct(costShareCur)}</td><td class="m-share">${fmtPct(costSharePrev)}</td><td class="m-share ${costDiff.cls}">${costDiff.text}</td>
+    <td class="m-share">${fmtPct(gmvShareCur)}</td><td class="m-share">${fmtPct(gmvSharePrev)}</td><td class="m-share ${gmvDiff.cls}">${gmvDiff.text}</td>`;
 }
 
 // ---------- state ----------
 const state = {pl:'',type:'',owner:'',op:'',campaign:'',campaignName:'',container:'',containerName:'',containerType:'',feed:'',feedName:'',start:'',end:'',cmpOn:false,cstart:'',cend:''};
 const pending = {...state};          // 查询按钮触发前暂存筛选条件
+let metricView='core';
 // D 在 startApp() 中赋值（解密后）
 let allDates = [];
 
@@ -520,6 +624,112 @@ function renderKPI(){
       notice.innerHTML = '';
     }
   }
+}
+
+function rollupByPl(rows, prevRows){
+  const byCur={}, byPrev={};
+  rows.forEach(r=>{ (byCur[r.pl]=byCur[r.pl]||[]).push(r); });
+  prevRows.forEach(r=>{ (byPrev[r.pl]=byPrev[r.pl]||[]).push(r); });
+  return Object.entries(byCur).map(([pl,rs])=>{
+    const cur=agg(rs), prev=agg(byPrev[pl]||[]);
+    const shop=shopifyWindowSales(pl);
+    return {pl,cur,prev,shop,roiDelta:prev.roi?cur.roi-prev.roi:null, shopRatio:cur.val?shop.sales/cur.val:null};
+  });
+}
+function shopifyWindowSales(pl){
+  let sales=0, orders=0, hasDaily=false;
+  (window.PL_TO_PTS[pl]||[]).forEach(pt=>{
+    const arr = D.shopifyCatDaily && D.shopifyCatDaily[pt];
+    if(arr) hasDaily=true;
+    const d=sumDaily(arr,state.start,state.end);
+    sales+=d.sales; orders+=d.orders;
+  });
+  const fallback=(D.shopifyCompare||{})[pl];
+  if(!hasDaily && fallback){ sales=fallback.salesTotal||0; orders=fallback.orders||0; }
+  return {sales,orders,hasDaily};
+}
+function insightCard(cls,label,name,meta){
+  return `<div class="insight ${cls||''}"><div class="label">${esc(label)}</div><div class="name" title="${esc(name)}">${esc(name)}</div><div class="meta">${meta}</div></div>`;
+}
+function renderInsights(){
+  const curRows=filterRows(D.campaigns), prevRows=filterRowsPrev(D.campaigns);
+  const el=document.getElementById('insights');
+  if(!curRows.length){ el.innerHTML='<div class="empty">当前筛选下暂无可分析数据</div>'; return; }
+  const pls=rollupByPl(curRows,prevRows);
+  const meaningful=pls.filter(x=>x.cur.cost>=500);
+  const best=[...meaningful].sort((a,b)=>b.cur.roi-a.cur.roi)[0];
+  const risk=[...meaningful].sort((a,b)=>(b.cur.cost*(2.2-b.cur.roi))-(a.cur.cost*(2.2-a.cur.roi)))[0];
+  const drop=[...meaningful].filter(x=>x.roiDelta!=null).sort((a,b)=>a.roiDelta-b.roiDelta)[0];
+  const shopGap=[...meaningful].filter(x=>x.shop.sales>0 && x.cur.cost>0).sort((a,b)=>(b.shop.sales/b.cur.cost)-(a.shop.sales/a.cur.cost))[0];
+  const cards=[];
+  if(best) cards.push(insightCard('g','可优先关注 / 加预算候选',best.pl,`ROI ${best.cur.roi.toFixed(2)} · 花费 ${fmtMoney(best.cur.cost)} · 转化价值 ${fmtMoney(best.cur.val)}`));
+  if(risk) cards.push(insightCard('r','需复盘 / 控成本候选',risk.pl,`ROI ${risk.cur.roi.toFixed(2)} · 花费 ${fmtMoney(risk.cur.cost)} · CPA ${fmtMoney(risk.cur.cpa)}`));
+  if(drop) cards.push(insightCard('y','ROI 环比下滑最大',drop.pl,`本期 ${drop.cur.roi.toFixed(2)} / 上期 ${drop.prev.roi.toFixed(2)} · 变化 ${drop.roiDelta.toFixed(2)}`));
+  if(shopGap) cards.push(insightCard('g','Shopify 承接较强',shopGap.pl,`Shopify销售额/广告费 ${(shopGap.shop.sales/shopGap.cur.cost).toFixed(2)} · Shopify ${fmtMoney(shopGap.shop.sales)}`));
+  el.innerHTML=cards.join('') || '<div class="empty">当前筛选下暂无明显洞察</div>';
+}
+function renderDataHealth(){
+  const el=document.getElementById('dataHealth');
+  const curFeed=filterRows(D.feed||[]);
+  const map=D.feedSkuMap||{};
+  const totalCost=sum(curFeed,'cost');
+  const unmappedRows=curFeed.filter(r=>!map[r.feedid||r.feed]);
+  const unmappedCost=sum(unmappedRows,'cost');
+  const mappedRate=totalCost ? 1-unmappedCost/totalCost : null;
+  const curCamp=filterRows(D.campaigns||[]);
+  const missOwner=new Set(curCamp.filter(r=>!r.owner).map(r=>r.cid)).size;
+  const missOp=new Set(curCamp.filter(r=>!r.op).map(r=>r.cid)).size;
+  const unmatchedCount=Object.keys(D.shopifyUnmatched||{}).length;
+  const health = [
+    ['Feed 映射率', mappedRate==null?'—':fmtPct(mappedRate), `未映射花费 ${fmtMoney(unmappedCost)} / ${fmtNum(unmappedRows.length)} 行`],
+    ['SKU 映射表', fmtNum(Object.keys(map).length), 'FeedID → SKU 可用映射'],
+    ['负责人完整度', missOwner?`${missOwner} 个缺失`:'完整', `运营缺失 ${missOp} 个系列`],
+    ['未匹配 Shopify 类目', fmtNum(unmatchedCount), '影响品线级站内对比覆盖']
+  ];
+  el.innerHTML=health.map(([t,v,d])=>`<div class="health"><div class="t">${esc(t)}</div><div class="v">${esc(v)}</div><div class="d">${esc(d)}</div></div>`).join('');
+}
+function renderAudienceSegments(){
+  const el=document.getElementById('audienceSegments');
+  const note=document.getElementById('audienceNote');
+  const tb=document.querySelector('#audienceTable tbody');
+  const rows=(D.audienceSegments||[]).filter(r=>
+    (!r.date || inRange(r.date,state.start,state.end)) &&
+    (!state.pl || r.pl===state.pl) &&
+    (!state.type || r.type===state.type) &&
+    (!state.owner || r.owner===state.owner) &&
+    (!state.op || r.op===state.op) &&
+    (!state.campaign || r.cid===state.campaign));
+  if(!rows.length){
+    el.innerHTML='<div class="empty">未接入「细分受众群-LFY」真实报告，或当前筛选下无受众数据</div>';
+    tb.innerHTML='<tr><td colspan="8" style="color:var(--sub);padding:14px">请从 Google Ads 后台：洞察和报告 → 报告编辑器 → 已保存报告 → 细分受众群-LFY 导出 CSV/XLSX，并放到 数据源/细分受众群-LFY.csv 或 .xlsx 后重建。</td></tr>';
+    note.textContent='本板块只展示 Google Ads 后台报告真实数据，不使用搜索词或品线推断。';
+    return;
+  }
+  const byAud={};
+  rows.forEach(r=>{
+    const k=r.audience||'未命名受众';
+    const o=byAud[k]=byAud[k]||{audience:k,cost:0,val:0,conv:0,imp:0,clk:0,campaigns:new Set(),pls:new Set()};
+    o.cost+=+r.cost||0; o.val+=+r.val||0; o.conv+=+r.conv||0; o.imp+=+r.imp||0; o.clk+=+r.clk||0;
+    if(r.campaign) o.campaigns.add(r.campaign);
+    if(r.pl) o.pls.add(r.pl);
+  });
+  let arr=Object.values(byAud).map(o=>({...o,roi:o.cost?o.val/o.cost:0,ctr:o.imp?o.clk/o.imp:0,cvr:o.clk?o.conv/o.clk:0,cpc:o.clk?o.cost/o.clk:0,cpa:o.conv?o.cost/o.conv:0}));
+  arr.sort((a,b)=>b.cost-a.cost);
+  const top=arr.slice(0,6);
+  el.innerHTML=top.map(o=>{
+    const tag=o.roi>=3?'高ROI':(o.roi<1?'低ROI':'观察');
+    return `<div class="audience">
+      <div class="top"><div class="name" title="${esc(o.audience)}">${esc(o.audience)}</div><div class="score">${tag}</div></div>
+      <div class="meta">花费 ${fmtMoney(o.cost)} · 转化价值 ${fmtMoney(o.val)} · ROI ${o.roi.toFixed(2)}<br>点击 ${fmtNum(o.clk)} · CTR ${fmtPct(o.ctr)} · CVR ${fmtPct(o.cvr)}</div>
+      <div class="action">覆盖 ${o.campaigns.size} 个系列 / ${o.pls.size} 个品线，按花费排序来自「细分受众群-LFY」报告。</div>
+    </div>`;
+  }).join('');
+  tb.innerHTML=arr.slice(0,40).map(o=>`<tr>
+    <td title="${esc(o.audience)}">${esc(o.audience)}</td>
+    <td>${fmtMoney(o.cost)}</td><td>${fmtMoney(o.val)}</td><td>${o.roi.toFixed(2)}</td>
+    <td>${fmtNum(o.conv)}</td><td>${fmtNum(o.clk)}</td><td>${fmtPct(o.ctr)}</td><td>${fmtPct(o.cvr)}</td>
+  </tr>`).join('');
+  note.textContent=`已接入 Google Ads 真实受众报告：当前筛选下 ${fmtNum(rows.length)} 行，聚合为 ${fmtNum(arr.length)} 个细分受众群。`;
 }
 
 // ---------- trend ----------
@@ -1153,7 +1363,7 @@ function renderTags(){
 // ---------- master render ----------
 function renderAll(){
   document.getElementById('daterange').textContent=`${state.start} ~ ${state.end}`;
-  renderKPI(); renderTrend(); renderTypePie();
+  renderKPI(); renderInsights(); renderDataHealth(); renderAudienceSegments(); renderTrend(); renderTypePie();
   renderCampaignTable(); renderNewOldTable(); renderKeywordTable(); renderPlTable(); renderCompare(); renderAnomaly(); renderTags();
   renderCrumb(); renderDrill();
 }
@@ -1261,6 +1471,11 @@ function initFilters(){
     syncFiltersToPending();
     renderAll();
   };
+  document.querySelectorAll('#metric-switch [data-view]').forEach(btn=>btn.onclick=()=>{
+    metricView=btn.dataset.view;
+    document.body.dataset.metricView=metricView;
+    document.querySelectorAll('#metric-switch [data-view]').forEach(b=>b.classList.toggle('active', b.dataset.view===metricView));
+  });
 }
 
 // trend metric switch
@@ -1536,6 +1751,7 @@ function showGate(payload){
 }
 function boot(){
   applyDateDefault();
+  document.body.dataset.metricView=metricView;
   initFilters();
   initAuction();
   renderAll();

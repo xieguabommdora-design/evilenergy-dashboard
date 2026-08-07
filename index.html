@@ -7,24 +7,24 @@
 <script src="./echarts.min.js"></script>
 <style>
   :root{
-    --bg:#f5f6fa; --card:#fff; --line:#e6e8ef; --txt:#1f2430; --sub:#8a90a2;
-    --brand:#2f6bff; --red:#e23d3d; --green:#1ea672; --warn:#f5a623; --purple:#7a5af5;
-    --chip:#eef2ff;
+    --bg:#f3f5f9; --card:#fff; --line:#dfe5f0; --txt:#172033; --sub:#7d8799;
+    --brand:#2563eb; --red:#dc2626; --green:#059669; --warn:#d97706; --purple:#7c3aed;
+    --chip:#eef4ff; --soft:#f8fafc; --shadow:0 10px 24px rgba(15,23,42,.055);
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--txt);font-size:13px}
-  .wrap{max-width:1440px;margin:0 auto;padding:16px}
-  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-  header h1{font-size:19px;font-weight:700}
-  header .sub{color:var(--sub);font-size:12px;margin-top:2px}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--txt);font-size:13px;line-height:1.45}
+  .wrap{max-width:1480px;margin:0 auto;padding:18px 22px 36px}
+  header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;padding:2px 2px 0}
+  header h1{font-size:22px;font-weight:800;color:#0f172a}
+  header .sub{color:var(--sub);font-size:12px;margin-top:4px}
   /* filter bar */
-  .filters{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end;margin-bottom:14px}
+  .filters{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;margin-bottom:14px;box-shadow:var(--shadow);position:sticky;top:0;z-index:30}
   .filters .f{display:flex;flex-direction:column;gap:4px}
   .filters label{font-size:11px;color:var(--sub)}
   .filters select,.filters input{height:30px;border:1px solid var(--line);border-radius:8px;padding:0 8px;background:#fff;font-size:13px;color:var(--txt)}
   .filters .clear{cursor:pointer;color:var(--brand);font-size:12px;height:30px;display:flex;align-items:center;padding:0 6px}
   .filters .active-tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-  .tag{background:var(--chip);color:var(--brand);border-radius:20px;padding:4px 10px;font-size:12px;display:flex;align-items:center;gap:6px}
+  .tag{background:var(--chip);color:var(--brand);border-radius:20px;padding:4px 10px;font-size:12px;display:flex;align-items:center;gap:6px;border:1px solid #dbe7ff}
   .tag b{cursor:pointer;font-weight:700}
   /* 面包屑 */
   .crumb{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;margin:2px 0 10px;color:var(--sub)}
@@ -33,29 +33,48 @@
   .crumb .seg.cur{background:var(--brand);color:#fff;cursor:default}
   .crumb .arrow{color:var(--sub);font-size:12px}
   /* KPI */
-  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:14px}
-  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
-  .kpi .t{color:var(--sub);font-size:12px}
-  .kpi .v{font-size:22px;font-weight:700;margin-top:4px}
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:12px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;box-shadow:var(--shadow)}
+  .kpi .t{color:var(--sub);font-size:11px;font-weight:700}
+  .kpi .v{font-size:23px;font-weight:800;margin-top:5px;color:#0f172a}
   .kpi .d{font-size:12px;margin-top:4px}
   .up{color:var(--green)} .down{color:var(--red)} .flat{color:var(--sub)}
+  .chg{display:inline-flex;align-items:center;justify-content:center;min-width:46px;padding:1px 5px;border-radius:999px;font-size:10px;font-weight:700;line-height:1.2;white-space:nowrap}
+  .chg.up{color:#047857;background:#ecfdf5;border:1px solid #bbf7d0}
+  .chg.down{color:#b91c1c;background:#fff1f2;border:1px solid #fecdd3}
+  .chg.flat{color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0}
+  .chg.strong.up{background:#d1fae5;border-color:#86efac}
+  .chg.strong.down{background:#ffe4e6;border-color:#fda4af}
   /* layout */
-  .grid{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:14px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
-  .card h3{font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+  .grid{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px;box-shadow:var(--shadow)}
+  .card .card{box-shadow:none;border-color:#edf1f7}
+  .card > h3{font-size:14px;margin:-14px -14px 12px;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,#ffffff,#f8fafc);border-bottom:1px solid var(--line);border-radius:8px 8px 0 0;color:#0f172a}
   .card h3 .hint{font-size:11px;color:var(--sub);font-weight:400}
   /* table */
   table{width:100%;border-collapse:collapse;font-size:12px}
-  th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  th,td{padding:7px 8px;text-align:right;border-bottom:1px solid #edf1f7;white-space:nowrap}
   th:first-child,td:first-child{text-align:left}
-  th{color:var(--sub);font-weight:600;cursor:pointer;user-select:none;background:#fff;position:sticky;top:0;z-index:1}
+  th{color:#64748b;font-weight:700;cursor:pointer;user-select:none;background:#f8fafc;position:sticky;top:0;z-index:1}
+  tbody tr:nth-child(even){background:#fcfdff}
+  #plTable,#campTable{border-collapse:collapse}
+  #plTable th,#plTable td,#campTable th,#campTable td{border-bottom:1px solid #eef2f7}
+  #plTable td:first-child,#campTable td:first-child{font-weight:650;color:#172033}
+  #plTable .m-roi,#campTable .m-roi{background:#fbfdff}
+  #plTable .m-cost,#campTable .m-cost{background:#fffdf7}
+  #plTable .m-val,#campTable .m-val{background:#f8fffb}
+  #plTable .m-share,#campTable .m-share{background:#faf8ff}
+  #plTable td:has(.chg),#campTable td:has(.chg),#newoldTable td:has(.chg){min-width:64px;padding-left:4px;padding-right:4px;text-align:center}
+  .table-scroll{position:relative}
+  .table-scroll:after{content:"";position:absolute;right:0;top:0;bottom:0;width:22px;pointer-events:none;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.92))}
+  .card > h3 > button[onclick*="plTable"],.card > h3 > button[onclick*="campTable"]{display:none}
   tbody tr{cursor:pointer}
   tbody tr:hover{background:#f7f9ff}
   .pill{padding:2px 8px;border-radius:20px;font-size:11px;background:#eef2ff;color:var(--brand)}
   .pill.r{background:#ffeaea;color:var(--red)} .pill.g{background:#e7f8f0;color:var(--green)}
   .num-neg{color:var(--red)} .num-pos{color:var(--green)}
   #campTable th,#campTable td,#plTable th,#plTable td{padding:5px 4px;font-size:10.5px}
-  #campTable th:first-child,#plTable th:first-child{min-width:120px;z-index:2}
+  #campTable th:first-child,#plTable th:first-child{min-width:120px}
   .wrap-card{overflow:auto}
   /* anomaly */
   .anom{display:flex;flex-direction:column;gap:10px}
@@ -73,14 +92,33 @@
   .anom-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;color:#0f172a}
   .anom-detail{flex-shrink:0;color:var(--sub);font-size:11px;white-space:nowrap}
   .anom-more{color:var(--sub);font-size:11px;padding:4px 0 0}
-  .section-title{font-size:15px;font-weight:700;margin:4px 0 10px}
-  .note{background:#fffbe9;border:1px solid #ffe69a;border-radius:8px;padding:8px 10px;font-size:12px;color:#8a6d00;margin-bottom:14px}
+  .section-title{font-size:15px;font-weight:800;margin:4px 0 10px;color:#0f172a}
+  .module-divider{display:flex;align-items:center;gap:10px;margin:18px 0 10px;color:#0f172a}
+  .module-divider span{display:inline-flex;align-items:center;justify-content:center;width:28px;height:22px;border-radius:6px;background:#e9f0ff;color:var(--brand);font-size:11px;font-weight:800}
+  .module-divider b{font-size:15px}
+  .module-divider:after{content:"";height:1px;background:#dfe5f0;flex:1}
+  .note{background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:8px 10px;font-size:12px;color:#9a3412;margin-bottom:14px}
   .legend{font-size:11px;color:var(--sub);margin-top:6px}
-  .btn{background:var(--brand);color:#fff;border:none;border-radius:8px;height:30px;padding:0 16px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+  .btn{background:var(--brand);color:#fff;border:none;border-radius:7px;height:30px;padding:0 16px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
   .btn:hover{opacity:.92}
   .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--txt)}
   .btn.tiny{height:24px;padding:0 10px;font-size:11px}
-  .stack{display:flex;flex-direction:column;gap:14px;margin-bottom:14px}
+  .stack{display:flex;flex-direction:column;gap:14px;margin-bottom:16px}
+  html{scroll-behavior:smooth}
+  .side-nav{position:fixed;left:18px;top:96px;width:132px;z-index:20;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px;box-shadow:var(--shadow)}
+  .side-nav .nt{font-size:11px;color:var(--sub);font-weight:700;padding:4px 8px 8px}
+  .side-nav a{display:block;text-decoration:none;color:#334155;font-size:12px;padding:7px 8px;border-radius:6px;line-height:1.2}
+  .side-nav a:hover{background:#eef2ff;color:var(--brand)}
+  .module-anchor{scroll-margin-top:18px}
+  .table-tools{display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin:-2px 0 8px;padding:7px 8px;background:#f8fafc;border:1px solid #edf1f7;border-radius:7px}
+  .table-tools .hint{margin-right:auto}
+  .fullscreen-mask{position:fixed;inset:0;background:rgba(15,23,42,.56);z-index:10000;display:none;padding:24px}
+  .fullscreen-panel{height:100%;background:#fff;border-radius:8px;display:flex;flex-direction:column;overflow:hidden}
+  .fullscreen-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .fullscreen-head .title{font-weight:700;font-size:14px}
+  .fullscreen-body{overflow:auto;padding:10px 14px}
+  .fullscreen-body table{font-size:12px}
+  .fullscreen-body th{top:0}
   .insight-band{display:grid;grid-template-columns:1.45fr 1fr;gap:14px;margin-bottom:14px}
   .insights{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .insight{border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:8px;padding:10px 12px;background:#fff;min-height:74px}
@@ -93,6 +131,11 @@
   .health .t{font-size:11px;color:var(--sub)}
   .health .v{font-size:18px;font-weight:700;margin-top:5px}
   .health .d{font-size:11px;color:var(--sub);margin-top:4px}
+  .weekly-card{margin-bottom:14px}
+  .weekly-placeholder{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .weekly-slot{border:1px dashed #d8deea;border-radius:8px;padding:12px;background:#fbfcff;min-height:92px}
+  .weekly-slot .t{font-size:12px;color:#475569;font-weight:700}
+  .weekly-slot .v{font-size:12px;color:var(--sub);line-height:1.55;margin-top:8px}
   .audience-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:10px}
   .audience{border:1px solid var(--line);border-radius:8px;padding:11px 12px;background:#fff;min-height:128px}
   .audience .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:7px}
@@ -153,8 +196,15 @@
   body[data-metric-view="share"] #plTable .m-aov,
   body[data-metric-view="share"] #plTable .m-imp{display:none}
   @media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
+  @media(max-width:1100px){.weekly-placeholder{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:1100px){.audience-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:1500px){
+    .side-nav{position:sticky;top:0;width:auto;margin-bottom:12px;display:flex;gap:4px;align-items:center;overflow:auto}
+    .side-nav .nt{padding:4px 8px;white-space:nowrap}
+    .side-nav a{white-space:nowrap}
+  }
   @media(max-width:900px){.insight-band{grid-template-columns:1fr}.insights,.health-grid{grid-template-columns:1fr}}
+  @media(max-width:700px){.weekly-placeholder{grid-template-columns:1fr}}
   @media(max-width:700px){.audience-grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -199,6 +249,20 @@
     <div class="active-tags" id="active-tags"></div>
   </div>
 
+  <nav class="side-nav">
+    <div class="nt">目录</div>
+    <a href="#overview">总览</a>
+    <a href="#weekly-sec">周报分析</a>
+    <a href="#trend-sec">账户趋势</a>
+    <a href="#pl-sec">负责人/品线</a>
+    <a href="#campaign-sec">广告系列</a>
+    <a href="#audience-sec">受众 & 关键词</a>
+    <a href="#shopify-sec">Shopify & SKU</a>
+    <a href="#anom-sec">异常提醒</a>
+    <a href="#auction-sec">竞品分析</a>
+  </nav>
+
+  <section id="overview" class="module-anchor">
   <div class="kpis" id="kpis"></div>
   <div id="compare-notice" style="margin:-6px 0 8px 0;font-size:12px;color:var(--accent);min-height:18px;"></div>
 
@@ -212,17 +276,21 @@
       <div class="health-grid" id="dataHealth"></div>
     </div>
   </div>
+  </section>
 
-  <div class="card">
-    <h3>受众人群分析 <span class="hint">Google Ads 已保存报告「细分受众群-LFY」</span></h3>
-    <div class="audience-grid" id="audienceSegments"></div>
-    <div class="audience-table-wrap"><table id="audienceTable"><thead><tr>
-      <th>细分受众群</th><th>花费</th><th>转化价值</th><th>ROI</th><th>转化</th><th>点击</th><th>CTR</th><th>CVR</th>
-    </tr></thead><tbody></tbody></table></div>
-    <div class="hint" id="audienceNote"></div>
-  </div>
+  <div class="module-divider"><span>01</span><b>周报与复盘</b></div>
+  <section class="card module-anchor weekly-card" id="weekly-sec">
+    <h3>周报分析 <span class="hint">预留模块 · 后续可接入周报结论、负责人复盘和品线行动项</span></h3>
+    <div class="weekly-placeholder">
+      <div class="weekly-slot"><div class="t">本周摘要</div><div class="v">预留本周核心变化、目标达成和主要风险。</div></div>
+      <div class="weekly-slot"><div class="t">机会品线</div><div class="v">预留高 ROI、高承接或可加预算的品线判断。</div></div>
+      <div class="weekly-slot"><div class="t">问题广告</div><div class="v">预留花费异常、ROI 下滑、库存或素材问题。</div></div>
+      <div class="weekly-slot"><div class="t">下周动作</div><div class="v">预留负责人、优先级、预计影响和跟进状态。</div></div>
+    </div>
+  </section>
 
-  <div class="grid">
+  <div class="module-divider"><span>02</span><b>账户趋势</b></div>
+  <div class="grid module-anchor" id="trend-sec">
     <div class="card">
       <h3 style="gap:10px">趋势图 <span class="hint" id="trend-hint">当前指标: <b>费用</b> · 点击切换</span>
         <button class="btn" id="trend-cross" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">交叉视图</button>
@@ -236,7 +304,8 @@
   </div>
 
   <!-- 新老广告环比 -->
-  <div class="card">
+  <div class="module-divider"><span>03</span><b>经营明细</b></div>
+  <div class="card module-anchor" id="newold-sec">
     <h3 style="gap:10px">新老广告环比 <span class="hint">按广告系列名中的上线日期（YYMMDD）计算：距期末 ≤90 天为新广告，>90 天为老广告</span>
       <button class="btn" onclick="exportNewOld()" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">导出CSV</button></h3>
     <div class="wrap-card" style="max-height:260px">
@@ -263,10 +332,10 @@
   </div>
 
   <div class="stack">
-    <div class="card">
+    <div class="card module-anchor" id="pl-sec">
       <h3 style="gap:10px">品线汇总 <span class="hint">点击行筛选该品线 · 表头与广告系列效果保持一致</span>
         <button class="btn" onclick="exportTable('plTable','品线汇总')" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">导出CSV</button></h3>
-      <div class="wrap-card" style="max-height:260px">
+      <div class="wrap-card table-scroll" style="max-height:260px">
         <table id="plTable">
           <thead><tr>
             <th data-k="pl">品线</th>
@@ -289,11 +358,11 @@
         </table>
       </div>
     </div>
-    <div class="card">
+    <div class="card module-anchor" id="campaign-sec">
       <h3 style="gap:10px">广告系列效果（核心 · 下钻路径：品线 → 广告系列 → 素材组/广告组 → Feed）<span class="hint" id="camp-hint"></span>
         <button class="btn" onclick="exportTable('campTable','广告系列效果')" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">导出CSV</button></h3>
       <div class="crumb" id="crumb"></div>
-      <div class="wrap-card" style="max-height:480px">
+      <div class="wrap-card table-scroll" style="max-height:480px">
         <table id="campTable">
           <thead><tr>
             <th data-k="campaign">广告系列</th>
@@ -318,7 +387,7 @@
         </table>
       </div>
     </div>
-    <div class="card" id="drillCard" style="display:none">
+    <div class="card module-anchor" id="drillCard" style="display:none">
       <div class="section-title" style="font-size:14px;margin-bottom:8px" id="drill-title"></div>
       <div style="overflow:auto;max-height:240px">
         <table id="drillTable">
@@ -327,7 +396,7 @@
         </table>
       </div>
     </div>
-    <div class="card">
+    <div class="card module-anchor" id="shopify-sec">
       <h3 style="gap:10px"><span id="compare-title">广告 × Shopify 站内 类目对比</span> <span class="hint" id="compare-hint">行=品线 · 左广告端 / 右 Shopify 站内端 · 流量/转化率=落地页级按品类聚合</span>
         <button class="btn" id="compare-export" onclick="exportTable('compareTable','广告Shopify类目对比')" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">导出CSV</button></h3>
       <div class="wrap-card" style="max-height:420px">
@@ -340,9 +409,19 @@
     </div>
   </div>
 
+  <div class="module-divider"><span>04</span><b>受众与关键词</b></div>
+  <div class="card module-anchor" id="audience-sec">
+    <h3>受众人群分析 <span class="hint">Google Ads 已保存报告「细分受众群-LFY」 · 跟随当前筛选/广告系列</span></h3>
+    <div class="audience-grid" id="audienceSegments"></div>
+    <div class="audience-table-wrap"><table id="audienceTable"><thead><tr>
+      <th>细分受众群</th><th>花费</th><th>转化价值</th><th>ROI</th><th>转化</th><th>点击</th><th>CTR</th><th>CVR</th>
+    </tr></thead><tbody></tbody></table></div>
+    <div class="hint" id="audienceNote"></div>
+  </div>
+
   <!-- 关键词分析 -->
-  <div class="card">
-    <h3 style="gap:10px">关键词分析 <span class="hint">整站搜索字词 · 全期累计 · 仅保留转化价值 Top 100</span>
+  <div class="card module-anchor" id="keyword-sec">
+    <h3 style="gap:10px">关键词分析 <span class="hint" id="kw-hint">搜索字词 · 跟随当前筛选/广告系列</span>
       <button class="btn" onclick="exportKeywordAll()" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">导出CSV</button></h3>
     <div class="wrap-card" style="max-height:480px">
       <table id="kwTable">
@@ -364,12 +443,13 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="module-divider"><span>05</span><b>风险与竞争</b></div>
+  <div class="card module-anchor" id="anom-sec">
     <h3>异常提醒 <span class="hint">近半月 vs 前半月 · 仅状态 ENABLED 的系列 · 阈值：花费降超30% / 销售额降超25% / ROI跌破1</span></h3>
     <div class="anom" id="anom"></div>
   </div>
 
-  <div class="section-title" style="margin-top:18px">竞品分析 · 竞价洞察 <span style="font-size:12px;color:var(--sub);font-weight:400">账户级月度 · 与上方品线/系列筛选相互独立</span></div>
+  <div class="section-title module-anchor" id="auction-sec" style="margin-top:18px">竞品分析 · 竞价洞察 <span style="font-size:12px;color:var(--sub);font-weight:400">账户级月度 · 与上方品线/系列筛选相互独立</span></div>
   <div class="card">
     <div style="display:flex;gap:14px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
       <div class="f" style="flex-direction:row;align-items:center;gap:6px"><label style="margin:0">广告类型</label>
@@ -403,7 +483,7 @@
 </div>
 
 <script>
-const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608061004"};
+const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608070924"};
 let DASHBOARD_DATA = null;
 let D = null;
 
@@ -435,14 +515,16 @@ function fmtChg(cur,prev,goodUp=true){
   if(prev==null || prev===0 || isNaN(prev)) return {text:'—', cls:'flat'};
   const ch=(cur-prev)/Math.abs(prev);
   const up=ch>=0;
-  const cls=(up===goodUp)?'up':'down';
-  return {text:(up?'▲':'▼')+Math.abs(ch*100).toFixed(2)+'%', cls};
+  const cls=Math.abs(ch)<0.01?'flat':((up===goodUp)?'up':'down');
+  const strong=Math.abs(ch)>=0.2 ? ' strong' : '';
+  return {text:(up?'▲':'▼')+Math.abs(ch*100).toFixed(2)+'%', cls:cls+strong};
 }
 function fmtShareDiff(curShare,prevShare,goodUp=true){
   const diff=(curShare||0)-(prevShare||0);
   const up=diff>=0;
-  const cls=(up===goodUp)?'up':'down';
-  return {text:(up?'+':'')+(diff*100).toFixed(2)+'pp', cls};
+  const cls=Math.abs(diff)<0.002?'flat':((up===goodUp)?'up':'down');
+  const strong=Math.abs(diff)>=0.02 ? ' strong' : '';
+  return {text:(up?'+':'')+(diff*100).toFixed(2)+'pp', cls:cls+strong};
 }
 function metricCells(cur,prev,grandCur,grandPrev){
   const prevObj=prev||{};
@@ -463,26 +545,109 @@ function metricCells(cur,prev,grandCur,grandPrev){
   const costDiff=fmtShareDiff(costShareCur,costSharePrev,false);
   const gmvDiff=fmtShareDiff(gmvShareCur,gmvSharePrev,true);
   return `
-    <td class="m-roi">${cur.roi.toFixed(2)}</td><td class="m-roi">${fmtNum(prevObj.roi)}</td><td class="m-roi ${roiChg.cls}">${roiChg.text}</td>
-    <td class="m-cost">${fmtMoney(cur.cost)}</td><td class="m-cost">${fmtMoney(prevObj.cost)}</td><td class="m-cost ${costChg.cls}">${costChg.text}</td>
-    <td class="m-val">${fmtMoney(cur.val)}</td><td class="m-val">${fmtMoney(prevObj.val)}</td><td class="m-val ${gmvChg.cls}">${gmvChg.text}</td>
-    <td class="m-cpc">${fmtMoney(cur.cpc)}</td><td class="m-cpc">${fmtMoney(prevObj.cpc)}</td><td class="m-cpc ${cpcChg.cls}">${cpcChg.text}</td>
-    <td class="m-cvr">${fmtPct(cur.convRate)}</td><td class="m-cvr">${fmtPct(prevObj.convRate)}</td><td class="m-cvr ${cvrChg.cls}">${cvrChg.text}</td>
-    <td class="m-ctr">${fmtPct(cur.ctr)}</td><td class="m-ctr">${fmtPct(prevObj.ctr)}</td><td class="m-ctr ${ctrChg.cls}">${ctrChg.text}</td>
-    <td class="m-cpa">${fmtMoney(cur.cpa)}</td><td class="m-cpa">${fmtMoney(prevObj.cpa)}</td><td class="m-cpa ${cpaChg.cls}">${cpaChg.text}</td>
-    <td class="m-conv">${fmtNum(cur.conv)}</td><td class="m-conv">${fmtNum(prevObj.conv)}</td><td class="m-conv ${convChg.cls}">${convChg.text}</td>
-    <td class="m-aov">${fmtMoney(cur.aov)}</td><td class="m-aov">${fmtMoney(prevObj.aov)}</td><td class="m-aov ${aovChg.cls}">${aovChg.text}</td>
-    <td class="m-imp">${fmtNum(cur.imp)}</td><td class="m-imp">${fmtNum(prevObj.imp)}</td><td class="m-imp ${impChg.cls}">${impChg.text}</td>
-    <td class="m-share">${fmtPct(costShareCur)}</td><td class="m-share">${fmtPct(costSharePrev)}</td><td class="m-share ${costDiff.cls}">${costDiff.text}</td>
-    <td class="m-share">${fmtPct(gmvShareCur)}</td><td class="m-share">${fmtPct(gmvSharePrev)}</td><td class="m-share ${gmvDiff.cls}">${gmvDiff.text}</td>`;
+    <td class="m-roi">${cur.roi.toFixed(2)}</td><td class="m-roi">${fmtNum(prevObj.roi)}</td><td class="m-roi"><span class="chg ${roiChg.cls}">${roiChg.text}</span></td>
+    <td class="m-cost">${fmtMoney(cur.cost)}</td><td class="m-cost">${fmtMoney(prevObj.cost)}</td><td class="m-cost"><span class="chg ${costChg.cls}">${costChg.text}</span></td>
+    <td class="m-val">${fmtMoney(cur.val)}</td><td class="m-val">${fmtMoney(prevObj.val)}</td><td class="m-val"><span class="chg ${gmvChg.cls}">${gmvChg.text}</span></td>
+    <td class="m-cpc">${fmtMoney(cur.cpc)}</td><td class="m-cpc">${fmtMoney(prevObj.cpc)}</td><td class="m-cpc"><span class="chg ${cpcChg.cls}">${cpcChg.text}</span></td>
+    <td class="m-cvr">${fmtPct(cur.convRate)}</td><td class="m-cvr">${fmtPct(prevObj.convRate)}</td><td class="m-cvr"><span class="chg ${cvrChg.cls}">${cvrChg.text}</span></td>
+    <td class="m-ctr">${fmtPct(cur.ctr)}</td><td class="m-ctr">${fmtPct(prevObj.ctr)}</td><td class="m-ctr"><span class="chg ${ctrChg.cls}">${ctrChg.text}</span></td>
+    <td class="m-cpa">${fmtMoney(cur.cpa)}</td><td class="m-cpa">${fmtMoney(prevObj.cpa)}</td><td class="m-cpa"><span class="chg ${cpaChg.cls}">${cpaChg.text}</span></td>
+    <td class="m-conv">${fmtNum(cur.conv)}</td><td class="m-conv">${fmtNum(prevObj.conv)}</td><td class="m-conv"><span class="chg ${convChg.cls}">${convChg.text}</span></td>
+    <td class="m-aov">${fmtMoney(cur.aov)}</td><td class="m-aov">${fmtMoney(prevObj.aov)}</td><td class="m-aov"><span class="chg ${aovChg.cls}">${aovChg.text}</span></td>
+    <td class="m-imp">${fmtNum(cur.imp)}</td><td class="m-imp">${fmtNum(prevObj.imp)}</td><td class="m-imp"><span class="chg ${impChg.cls}">${impChg.text}</span></td>
+    <td class="m-share">${fmtPct(costShareCur)}</td><td class="m-share">${fmtPct(costSharePrev)}</td><td class="m-share"><span class="chg ${costDiff.cls}">${costDiff.text}</span></td>
+    <td class="m-share">${fmtPct(gmvShareCur)}</td><td class="m-share">${fmtPct(gmvSharePrev)}</td><td class="m-share"><span class="chg ${gmvDiff.cls}">${gmvDiff.text}</span></td>`;
 }
 
 // ---------- state ----------
 const state = {pl:'',type:'',owner:'',op:'',campaign:'',campaignName:'',container:'',containerName:'',containerType:'',feed:'',feedName:'',start:'',end:'',cmpOn:false,cstart:'',cend:''};
 const pending = {...state};          // 查询按钮触发前暂存筛选条件
 let metricView='core';
+const tableUiState = {};
+const TABLE_TOOL_CONFIG = [
+  ['newoldTable','新老广告环比'],
+  ['plTable','品线汇总'],
+  ['campTable','广告系列效果'],
+  ['audienceTable','受众人群分析'],
+  ['kwTable','关键词分析'],
+  ['compareTable','广告 Shopify 对比'],
+  ['aucTable','竞品明细']
+];
 // D 在 startApp() 中赋值（解密后）
 let allDates = [];
+
+function ensureFullscreenLayer(){
+  let layer=document.getElementById('tableFullscreen');
+  if(layer) return layer;
+  layer=document.createElement('div');
+  layer.id='tableFullscreen';
+  layer.className='fullscreen-mask';
+  layer.innerHTML=`<div class="fullscreen-panel">
+    <div class="fullscreen-head">
+      <div class="title"></div>
+      <button class="btn ghost tiny" id="fsExport" style="margin-left:auto">导出CSV</button>
+      <button class="btn tiny" id="fsClose">关闭</button>
+    </div>
+    <div class="fullscreen-body"></div>
+  </div>`;
+  document.body.appendChild(layer);
+  layer.querySelector('#fsClose').onclick=()=>{layer.style.display='none';};
+  layer.onclick=e=>{ if(e.target===layer) layer.style.display='none'; };
+  return layer;
+}
+function openTableFullscreen(tableId,title){
+  const table=document.getElementById(tableId);
+  if(!table) return;
+  const layer=ensureFullscreenLayer();
+  const clone=table.cloneNode(true);
+  clone.querySelectorAll('tr').forEach(tr=>tr.style.display='');
+  layer.querySelector('.title').textContent=title;
+  layer.querySelector('.fullscreen-body').innerHTML='';
+  layer.querySelector('.fullscreen-body').appendChild(clone);
+  layer.querySelector('#fsExport').onclick=()=>exportTable(tableId,title);
+  layer.style.display='block';
+}
+function ensureTableTools(tableId,title){
+  const table=document.getElementById(tableId);
+  if(!table || document.querySelector(`.table-tools[data-table="${tableId}"]`)) return;
+  const host=table.closest('.wrap-card') || table.closest('.audience-table-wrap') || table;
+  const bar=document.createElement('div');
+  bar.className='table-tools';
+  bar.dataset.table=tableId;
+  bar.innerHTML=`<span class="hint"></span>
+    <button class="btn ghost tiny" data-action="toggle">展开全部</button>
+    <button class="btn ghost tiny" data-action="fullscreen">全屏</button>
+    <button class="btn ghost tiny" data-action="export">导出CSV</button>`;
+  host.parentNode.insertBefore(bar, host);
+  bar.querySelector('[data-action="toggle"]').onclick=()=>{
+    tableUiState[tableId]=!tableUiState[tableId];
+    applyTableLimit(tableId,title);
+  };
+  bar.querySelector('[data-action="fullscreen"]').onclick=()=>openTableFullscreen(tableId,title);
+  bar.querySelector('[data-action="export"]').onclick=()=>exportTable(tableId,title);
+}
+function applyTableLimit(tableId,title){
+  const table=document.getElementById(tableId);
+  if(!table) return;
+  const rows=[...table.querySelectorAll('tbody tr')];
+  const bar=document.querySelector(`.table-tools[data-table="${tableId}"]`);
+  if(!bar || !rows.length) return;
+  const limit=10;
+  const expanded=!!tableUiState[tableId];
+  rows.forEach((tr,i)=>{ tr.style.display=(expanded || i<limit) ? '' : 'none'; });
+  const btn=bar.querySelector('[data-action="toggle"]');
+  btn.textContent=expanded?'收起到Top 10':'展开全部';
+  btn.style.display=rows.length>limit?'inline-flex':'none';
+  bar.querySelector('.hint').textContent=rows.length>limit
+    ? `默认显示 Top ${limit} / 共 ${rows.length} 行`
+    : `共 ${rows.length} 行`;
+}
+function refreshTableTools(){
+  TABLE_TOOL_CONFIG.forEach(([id,title])=>{
+    ensureTableTools(id,title);
+    applyTableLimit(id,title);
+  });
+}
 
 function applyDateDefault(){
   const n = allDates.length;
@@ -576,7 +741,7 @@ function renderKPI(){
   const prev = agg(filterRowsPrev(D.campaigns));
   const aov = cur.conv? cur.val/cur.conv : 0;
   const aovP = prev.conv? prev.val/prev.conv : 0;
-  const pnl = (label,val,prevVal,fmt,goodUp=true)=>{
+  const pnl = (label,val,prevVal,fmt,goodUp=true,view='core')=>{
     let cls='flat',txt='—';
     if(prevVal!=null && prevVal!==0){
       const ch=(val-prevVal)/Math.abs(prevVal);
@@ -584,7 +749,18 @@ function renderKPI(){
       cls = (up===goodUp)?'up':'down';
       txt = (up?'▲':'▼') + Math.abs(ch*100).toFixed(1)+'%';
     }
-    return `<div class="kpi"><div class="t">${label}</div><div class="v">${fmt(val)}</div><div class="d ${cls}">${txt}</div></div>`;
+    return {view, html:`<div class="kpi"><div class="t">${label}</div><div class="v">${fmt(val)}</div><div class="d ${cls}">${txt}</div></div>`};
+  };
+  const delta = (val,prevVal,goodUp=true)=>{
+    if(prevVal==null || prevVal===0) return {cls:'flat',txt:'—'};
+    const ch=(val-prevVal)/Math.abs(prevVal);
+    const up=ch>=0;
+    return {cls:(up===goodUp)?'up':'down', txt:(up?'▲':'▼') + Math.abs(ch*100).toFixed(1)+'%'};
+  };
+  const pnlDual = (label,mainVal,mainPrev,mainFmt,subLabel,subVal,subPrev,subFmt,view='traffic')=>{
+    const main=delta(mainVal,mainPrev,true);
+    const sub=delta(subVal,subPrev,true);
+    return {view, html:`<div class="kpi"><div class="t">${label}</div><div class="v">${mainFmt(mainVal)}</div><div class="d ${main.cls}">${main.txt}</div><div class="d ${sub.cls}" style="margin-top:3px">${subLabel} ${subFmt(subVal)} · ${sub.txt}</div></div>`};
   };
   // 转化价值占比 / 花费占比：分子=当前筛选维度广告端合计；分母=当前时间区间内整个账户（不受品线/系列筛选）合计
   const cp = getComparePeriod();
@@ -595,22 +771,22 @@ function renderKPI(){
   const salesSharePrev = acctPrev.val ? prev.val/acctPrev.val : 0;
   const costShareCur = acctCur.cost ? cur.cost/acctCur.cost : 0;
   const costSharePrev = acctPrev.cost ? prev.cost/acctPrev.cost : 0;
-  const shareKpi =
-    pnl('转化价值占比', salesShareCur, salesSharePrev, fmtPct) +
-    pnl('花费占比', costShareCur, costSharePrev, fmtPct);
-
-  document.getElementById('kpis').innerHTML =
-    pnl('总花费',cur.cost,prev.cost,fmtMoney) +
-    pnl('转化价值(广告后台)',cur.val,prev.val,fmtMoney) +
-    pnl('ROI',cur.roi,prev.roi,v=>v.toFixed(2),true) +
-    pnl('转化次数',cur.conv,prev.conv,fmtNum) +
-    pnl('客单价(AOV)',aov,aovP,fmtMoney) +
-    pnl('点击率',cur.ctr,prev.ctr,fmtPct) +
-    pnl('展示次数',cur.imp,prev.imp,fmtNum) +
-    pnl('CPA',cur.cpa,prev.cpa,fmtMoney,false) +
-    pnl('CPC',cur.cpc,prev.cpc,fmtMoney,false) +
-    pnl('转化率',cur.convRate,prev.convRate,fmtPct) +
-    shareKpi;
+  const cards = [
+    pnl('总花费',cur.cost,prev.cost,fmtMoney,true,'core'),
+    pnl('转化价值(广告后台)',cur.val,prev.val,fmtMoney,true,'core'),
+    pnl('ROI',cur.roi,prev.roi,v=>v.toFixed(2),true,'core'),
+    pnl('转化次数',cur.conv,prev.conv,fmtNum,true,'conversion'),
+    pnl('客单价(AOV)',aov,aovP,fmtMoney,true,'conversion'),
+    pnl('展示次数',cur.imp,prev.imp,fmtNum,true,'traffic'),
+    pnlDual('点击次数 / 点击率',cur.clk,prev.clk,fmtNum,'CTR',cur.ctr,prev.ctr,fmtPct,'traffic'),
+    pnl('CPA',cur.cpa,prev.cpa,fmtMoney,false,'conversion'),
+    pnl('CPC',cur.cpc,prev.cpc,fmtMoney,false,'traffic'),
+    pnl('转化率',cur.convRate,prev.convRate,fmtPct,true,'conversion'),
+    pnl('转化价值占比', salesShareCur, salesSharePrev, fmtPct,true,'share'),
+    pnl('花费占比', costShareCur, costSharePrev, fmtPct,true,'share')
+  ];
+  const visibleCards = metricView==='all' ? cards : cards.filter(x=>x.view===metricView);
+  document.getElementById('kpis').innerHTML = visibleCards.map(x=>x.html).join('');
 
   const notice = document.getElementById('compare-notice');
   if(notice){
@@ -871,7 +1047,7 @@ function renderCampaignTable(){
   document.querySelectorAll('#campTable th[data-k]').forEach(th=>th.onclick=()=>{
     const k=th.dataset.k; if(k==='campaign'||k==='pl'||k==='type'||k==='status'||k==='op') return;
     if(campSortKey===k) campSortDir*=-1; else {campSortKey=k;campSortDir=-1;}
-    renderCampaignTable();
+    renderCampaignTable(); refreshTableTools();
   });
 }
 
@@ -905,14 +1081,39 @@ function renderNewOldTable(){
   </tr>`).join('');
 }
 
-let kwSortKey='cost', kwSortDir=-1, kwPage=1, kwPageSize=200, kwLastTotal=-1;
+let kwSortKey='cost', kwSortDir=-1, kwPage=1, kwPageSize=10, kwLastTotal=-1;
 // ---------- 关键词分析 ----------
 function getKwRows(){
-  return sortableRows(D.searchTerms||[], kwSortKey, kwSortDir);
+  const src=(D.searchTerms||[]).filter(r=>
+    (!r.date || inRange(r.date,state.start,state.end)) &&
+    (!state.pl || r.pl===state.pl) &&
+    (!state.type || r.type===state.type) &&
+    (!state.owner || r.owner===state.owner) &&
+    (!state.op || r.op===state.op) &&
+    (!state.campaign || r.cid===state.campaign));
+  const byTerm={};
+  src.forEach(r=>{
+    const k=r.term||'';
+    const o=byTerm[k]=byTerm[k]||{term:k,cost:0,val:0,conv:0,imp:0,clk:0,campaigns:new Set()};
+    o.cost+=+r.cost||0; o.val+=+r.val||0; o.conv+=+r.conv||0; o.imp+=+r.imp||0; o.clk+=+r.clk||0;
+    if(r.campaign) o.campaigns.add(r.campaign);
+  });
+  const rows=Object.values(byTerm).map(o=>({...o,
+    roi:o.cost?o.val/o.cost:0,
+    cpc:o.clk?o.cost/o.clk:0,
+    cpa:o.conv?o.cost/o.conv:0,
+    ctr:o.imp?o.clk/o.imp:0,
+    cvr:o.clk?o.conv/o.clk:0
+  }));
+  return sortableRows(rows, kwSortKey, kwSortDir);
 }
 function renderKeywordTable(){
   const all=getKwRows();
   if(all.length!==kwLastTotal){ kwPage=1; kwLastTotal=all.length; }
+  const hint=document.getElementById('kw-hint');
+  if(hint) hint.textContent = state.campaign
+    ? `当前广告系列：${state.campaignName} · 搜索词 ${all.length} 条`
+    : `搜索字词 · 跟随当前筛选 · ${all.length} 条`;
   const total=all.length;
   const pages=Math.max(1, Math.ceil(total/kwPageSize));
   if(kwPage>pages) kwPage=pages;
@@ -926,7 +1127,7 @@ function renderKeywordTable(){
     return;
   }
   tb.innerHTML=pageRows.map(r=>`<tr>
-    <td>${r.term}</td>
+    <td>${esc(r.term)}</td>
     <td>${fmtMoney(r.cost)}</td>
     <td>${fmtMoney(r.val)}</td>
     <td>${r.roi.toFixed(2)}</td>
@@ -940,7 +1141,7 @@ function renderKeywordTable(){
   document.querySelectorAll('#kwTable th[data-k]').forEach(th=>th.onclick=()=>{
     const k=th.dataset.k; if(k==='term') return;
     if(kwSortKey===k) kwSortDir*=-1; else {kwSortKey=k; kwSortDir=-1;}
-    kwPage=1; renderKeywordTable();
+    kwPage=1; renderKeywordTable(); refreshTableTools();
   });
   const p=document.getElementById('kwPager');
   p.innerHTML=`<span style="color:var(--sub)">共 ${total} 条 · 第 ${kwPage}/${pages} 页</span>
@@ -948,11 +1149,11 @@ function renderKeywordTable(){
     <button class="btn pgbtn" data-p="${kwPage-1}" ${kwPage===1?'disabled':''} style="height:24px;padding:0 8px;font-size:11px">上一页</button>
     <button class="btn pgbtn" data-p="${kwPage+1}" ${kwPage===pages?'disabled':''} style="height:24px;padding:0 8px;font-size:11px">下一页</button>
     <button class="btn pgbtn" data-p="${pages}" ${kwPage===pages?'disabled':''} style="height:24px;padding:0 8px;font-size:11px">末页</button>
-    <label style="margin-left:8px">每页<select id="kwSize" style="height:24px">${[200,500,1000,2000].map(s=>`<option ${s===kwPageSize?'selected':''}>${s}</option>`).join('')}</select>条</label>
+    <label style="margin-left:8px">每页<select id="kwSize" style="height:24px">${[10,50,200,500,1000].map(s=>`<option ${s===kwPageSize?'selected':''}>${s}</option>`).join('')}</select>条</label>
     <label style="margin-left:8px">跳到<input id="kwJump" type="number" min="1" max="${pages}" value="${kwPage}" style="width:54px;height:24px">页<button class="btn" id="kwGo" style="height:24px;padding:0 8px;font-size:11px">Go</button></label>`;
-  p.querySelectorAll('.pgbtn').forEach(b=>b.onclick=()=>{ const n=+b.dataset.p; if(n>=1&&n<=pages){kwPage=n; renderKeywordTable();} });
-  p.querySelector('#kwSize').onchange=e=>{ kwPageSize=+e.target.value; kwPage=1; kwLastTotal=-1; renderKeywordTable(); };
-  p.querySelector('#kwGo').onclick=()=>{ const n=+p.querySelector('#kwJump').value; if(n>=1&&n<=pages){kwPage=n; renderKeywordTable();} };
+  p.querySelectorAll('.pgbtn').forEach(b=>b.onclick=()=>{ const n=+b.dataset.p; if(n>=1&&n<=pages){kwPage=n; renderKeywordTable(); refreshTableTools();} });
+  p.querySelector('#kwSize').onchange=e=>{ kwPageSize=+e.target.value; kwPage=1; kwLastTotal=-1; renderKeywordTable(); refreshTableTools(); };
+  p.querySelector('#kwGo').onclick=()=>{ const n=+p.querySelector('#kwJump').value; if(n>=1&&n<=pages){kwPage=n; renderKeywordTable(); refreshTableTools();} };
 }
 
 // ---------- 面包屑导航 ----------
@@ -1143,7 +1344,7 @@ function renderPlTable(){
   document.querySelectorAll('#plTable th[data-k]').forEach(th=>th.onclick=()=>{
     const k=th.dataset.k; if(k==='pl'||k==='owner'||k==='op') return;
     if(plSortKey===k) plSortDir*=-1; else {plSortKey=k;plSortDir=-1;}
-    renderPlTable();
+    renderPlTable(); refreshTableTools();
   });
 }
 
@@ -1366,6 +1567,7 @@ function renderAll(){
   renderKPI(); renderInsights(); renderDataHealth(); renderAudienceSegments(); renderTrend(); renderTypePie();
   renderCampaignTable(); renderNewOldTable(); renderKeywordTable(); renderPlTable(); renderCompare(); renderAnomaly(); renderTags();
   renderCrumb(); renderDrill();
+  refreshTableTools();
 }
 
 // ---------- CSV 导出（导出当前筛选+排序后的表格）----------
@@ -1475,6 +1677,7 @@ function initFilters(){
     metricView=btn.dataset.view;
     document.body.dataset.metricView=metricView;
     document.querySelectorAll('#metric-switch [data-view]').forEach(b=>b.classList.toggle('active', b.dataset.view===metricView));
+    renderKPI();
   });
 }
 
@@ -1609,6 +1812,7 @@ function renderAucTable(){
       return `<tr ${isYou?'style="background:#fff7f7;font-weight:600"':''}>
         <td>${o.domain}</td>${cols.map(c=>`<td>${fmtCell(c[0],o)}</td>`).join('')}</tr>`;
     }).join('');
+    refreshTableTools();
   });
 }
 function renderAucAll(){
@@ -1616,6 +1820,7 @@ function renderAucAll(){
   const byD=aucByDomain();
   const nComp=Object.keys(byD).filter(d=>d!=='您').length;
   document.getElementById('auc-hint').textContent=`${aucState.kind==='shopping'?'购物广告':'搜索广告'} · ${aucMonths().length} 个月 · ${nComp} 个竞品域名`;
+  refreshTableTools();
 }
 function fillAucMonth(){
   const ms=aucMonths(); const lm=ms[ms.length-1];
@@ -1629,7 +1834,7 @@ function initAuction(){
   sel.value=aucState.kind;
   sel.onchange=e=>{aucState.kind=e.target.value; fillAucMonth(); renderAucAll();};
   fillAucMonth();
-  document.getElementById('auc-month').onchange=e=>{aucState.month=e.target.value; renderAucRank(); renderAucTable();};
+  document.getElementById('auc-month').onchange=e=>{aucState.month=e.target.value; renderAucRank(); renderAucTable(); refreshTableTools();};
   renderAucAll();
 }
 window.addEventListener('resize',()=>{ if(aucTrendChart)aucTrendChart.resize(); if(aucRankChart)aucRankChart.resize(); });

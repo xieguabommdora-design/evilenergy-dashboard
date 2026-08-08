@@ -12,13 +12,13 @@
     --chip:#eef4ff; --soft:#f8fafc; --shadow:0 10px 24px rgba(15,23,42,.055);
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--txt);font-size:13px;line-height:1.45}
-  .wrap{max-width:1480px;margin:0 auto;padding:18px 22px 36px}
-  header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;padding:2px 2px 0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#eef3f6;color:var(--txt);font-size:13px;line-height:1.45}
+  .wrap{max-width:none;margin:0 0 0 240px;padding:0 14px 28px}
+  header{display:flex;align-items:flex-start;justify-content:space-between;margin:0 -14px 0;padding:18px 22px 14px;background:#fff;border-bottom:1px solid #d7dee8}
   header h1{font-size:22px;font-weight:800;color:#0f172a}
   header .sub{color:var(--sub);font-size:12px;margin-top:4px}
   /* filter bar */
-  .filters{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;margin-bottom:14px;box-shadow:var(--shadow);position:sticky;top:0;z-index:30}
+  .filters{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-end;margin:14px 0;box-shadow:none;position:sticky;top:0;z-index:30}
   .filters .f{display:flex;flex-direction:column;gap:4px}
   .filters label{font-size:11px;color:var(--sub)}
   .filters select,.filters input{height:30px;border:1px solid var(--line);border-radius:8px;padding:0 8px;background:#fff;font-size:13px;color:var(--txt)}
@@ -33,8 +33,8 @@
   .crumb .seg.cur{background:var(--brand);color:#fff;cursor:default}
   .crumb .arrow{color:var(--sub);font-size:12px}
   /* KPI */
-  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:12px}
-  .kpi{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;box-shadow:var(--shadow)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+  .kpi{background:var(--card);border:1px solid #d7dee8;border-radius:6px;padding:16px 16px;box-shadow:none}
   .kpi .t{color:var(--sub);font-size:11px;font-weight:700}
   .kpi .v{font-size:23px;font-weight:800;margin-top:5px;color:#0f172a}
   .kpi .d{font-size:12px;margin-top:4px}
@@ -47,7 +47,7 @@
   .chg.strong.down{background:#ffe4e6;border-color:#fda4af}
   /* layout */
   .grid{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:16px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px;box-shadow:var(--shadow)}
+  .card{background:var(--card);border:1px solid #d7dee8;border-radius:6px;padding:14px;box-shadow:none}
   .card .card{box-shadow:none;border-color:#edf1f7}
   .card > h3{font-size:14px;margin:-14px -14px 12px;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,#ffffff,#f8fafc);border-bottom:1px solid var(--line);border-radius:8px 8px 0 0;color:#0f172a}
   .card h3 .hint{font-size:11px;color:var(--sub);font-weight:400}
@@ -55,7 +55,7 @@
   table{width:100%;border-collapse:collapse;font-size:12px}
   th,td{padding:7px 8px;text-align:right;border-bottom:1px solid #edf1f7;white-space:nowrap}
   th:first-child,td:first-child{text-align:left}
-  th{color:#64748b;font-weight:700;cursor:pointer;user-select:none;background:#f8fafc;position:sticky;top:0;z-index:1}
+  th{color:#334155;font-weight:700;cursor:pointer;user-select:none;background:#f7fafc;position:sticky;top:0;z-index:1}
   tbody tr:nth-child(even){background:#fcfdff}
   #plTable,#campTable{border-collapse:collapse}
   #plTable th,#plTable td,#campTable th,#campTable td{border-bottom:1px solid #eef2f7}
@@ -97,7 +97,7 @@
   .module-divider span{display:inline-flex;align-items:center;justify-content:center;width:28px;height:22px;border-radius:6px;background:#e9f0ff;color:var(--brand);font-size:11px;font-weight:800}
   .module-divider b{font-size:15px}
   .module-divider:after{content:"";height:1px;background:#dfe5f0;flex:1}
-  .note{background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:8px 10px;font-size:12px;color:#9a3412;margin-bottom:14px}
+  .note{background:#fff;border:1px solid #d7dee8;border-radius:6px;padding:8px 10px;font-size:12px;color:#475569;margin:14px 0}
   .legend{font-size:11px;color:var(--sub);margin-top:6px}
   .btn{background:var(--brand);color:#fff;border:none;border-radius:7px;height:30px;padding:0 16px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
   .btn:hover{opacity:.92}
@@ -105,10 +105,34 @@
   .btn.tiny{height:24px;padding:0 10px;font-size:11px}
   .stack{display:flex;flex-direction:column;gap:14px;margin-bottom:16px}
   html{scroll-behavior:smooth}
-  .side-nav{position:fixed;left:18px;top:96px;width:132px;z-index:20;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px;box-shadow:var(--shadow)}
-  .side-nav .nt{font-size:11px;color:var(--sub);font-weight:700;padding:4px 8px 8px}
-  .side-nav a{display:block;text-decoration:none;color:#334155;font-size:12px;padding:7px 8px;border-radius:6px;line-height:1.2}
-  .side-nav a:hover{background:#eef2ff;color:var(--brand)}
+  .side-nav{position:fixed;left:0;top:0;bottom:0;width:240px;z-index:40;background:#fff;border-right:1px solid #d7dee8;border-radius:0;padding:22px 14px;box-shadow:none}
+  .side-nav .nt{font-size:16px;color:#0f172a;font-weight:800;padding:0 8px 18px;border-bottom:1px solid #e5ebf2;margin-bottom:14px}
+  .side-nav .nt:after{content:"EVIL ENERGY";display:block;margin-top:4px;color:#64748b;font-size:12px;font-weight:500;letter-spacing:0}
+  .side-nav a{display:block;text-decoration:none;color:#0f172a;font-size:13px;padding:10px 12px;border-radius:6px;line-height:1.2;margin-bottom:8px}
+  .side-nav a:hover{background:#eaf2ff;color:#0f5bd6}
+  .side-nav a:first-of-type{background:#eaf2ff;color:#0f5bd6;font-weight:700}
+  .workspace-nav{display:grid;gap:8px;margin:12px 0 16px}
+  .workspace-btn{border:1px solid transparent;background:#fff;color:#0f172a;text-align:left;border-radius:6px;padding:10px 12px;cursor:pointer}
+  .workspace-btn b{display:block;font-size:13px}
+  .workspace-btn span{display:block;font-size:11px;color:#64748b;margin-top:3px}
+  .workspace-btn.active{background:#eaf2ff;border-color:#cfe0ff;color:#0f5bd6}
+  .workspace-btn.active span{color:#3869b7}
+  .sub-nav{border-top:1px solid #e5ebf2;padding-top:12px;margin-top:6px}
+  .sub-nav .sub-title{font-size:11px;color:#64748b;font-weight:700;margin:0 0 8px 8px}
+  .sub-nav[hidden]{display:none}
+  .workspace-hero{border:1px solid #d7dee8;background:#fff;border-radius:8px;padding:14px 16px;margin:0 0 14px}
+  .workspace-hero h2{font-size:22px;margin:0 0 4px;color:#0f172a}
+  .workspace-hero p{font-size:13px;color:#64748b;margin:0}
+  .workbench-shelf{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:0 0 16px}
+  .module-tile{display:block;text-decoration:none;background:#fff;border:1px solid #d7dee8;border-radius:6px;padding:10px 12px;box-shadow:none;color:#172033;min-height:72px}
+  .module-tile:hover{border-color:#b8ccff;background:#fbfdff}
+  .module-tile span{display:inline-flex;align-items:center;justify-content:center;width:24px;height:20px;border-radius:6px;background:#eef4ff;color:var(--brand);font-size:10px;font-weight:800;margin-bottom:8px}
+  .module-tile b{display:block;font-size:13px;margin-bottom:3px}
+  .module-tile em{display:block;font-style:normal;color:var(--sub);font-size:11px;line-height:1.35}
+  .module-tile.add-slot{border-style:dashed;background:#fbfcff;color:#64748b}
+  .module-tile.add-slot span{background:#f1f5f9;color:#64748b}
+  .workbench-zone{margin-bottom:2px}
+  .module-divider .slot-tag{margin-left:2px;border:1px solid #dbe7ff;background:#f8fbff;color:#64748b;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:600;font-style:normal}
   .module-anchor{scroll-margin-top:18px}
   .table-tools{display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin:-2px 0 8px;padding:7px 8px;background:#f8fafc;border:1px solid #edf1f7;border-radius:7px}
   .table-tools .hint{margin-right:auto}
@@ -136,6 +160,59 @@
   .weekly-slot{border:1px dashed #d8deea;border-radius:8px;padding:12px;background:#fbfcff;min-height:92px}
   .weekly-slot .t{font-size:12px;color:#475569;font-weight:700}
   .weekly-slot .v{font-size:12px;color:var(--sub);line-height:1.55;margin-top:8px}
+  .weekly-snapshot-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:10px}
+  .weekly-metric{border:1px solid #d7dee8;border-radius:6px;background:#fbfdff;padding:11px 12px}
+  .weekly-metric .t{font-size:11px;color:#64748b;font-weight:700}
+  .weekly-metric .v{font-size:20px;font-weight:800;color:#0f172a;margin-top:5px}
+  .weekly-metric .d{font-size:11px;margin-top:3px}
+  .weekly-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .weekly-mini{border:1px solid #edf1f7;border-radius:6px;background:#fff;padding:10px 12px}
+  .weekly-mini h4{font-size:12px;margin-bottom:8px}
+  .weekly-mini-row{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:5px 0;border-bottom:1px solid #f1f5f9}
+  .weekly-mini-row:last-child{border-bottom:0}
+  .weekly-head{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;margin-bottom:10px}
+  .weekly-head select{height:30px;border:1px solid var(--line);border-radius:6px;background:#fff;padding:0 8px}
+  .weekly-section{margin-top:12px}
+  .weekly-section h4{font-size:13px;margin-bottom:8px;color:#0f172a}
+  .weekly-table-wrap{overflow:auto;border:1px solid #edf1f7;border-radius:6px;background:#fff}
+  .weekly-table th,.weekly-table td{padding:7px 8px;font-size:12px}
+  .weekly-table th{position:static;background:#f7fafc}
+  .rating{display:inline-flex;align-items:center;justify-content:center;min-width:44px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700}
+  .rating.good{background:#ecfdf5;color:#047857;border:1px solid #bbf7d0}
+  .rating.ok{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+  .rating.watch{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
+  .rating.bad{background:#fff1f2;color:#be123c;border:1px solid #fecdd3}
+  .rating.new{background:#f1f5f9;color:#475569;border:1px solid #e2e8f0}
+  .weekly-insights{display:grid;grid-template-columns:1.2fr 1fr;gap:10px;margin-top:12px}
+  .weekly-insight-box{border:1px solid #edf1f7;border-radius:6px;background:#fbfdff;padding:10px 12px}
+  .weekly-insight-box h4{font-size:13px;margin-bottom:8px}
+  .weekly-insight-box ul{padding-left:18px;color:#334155;line-height:1.7}
+  .report-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+  .report-block{border:1px solid #e3e9f2;border-radius:6px;background:#fff;padding:12px}
+  .report-block h4{font-size:13px;margin-bottom:8px;color:#0f172a}
+  .report-block ul{padding-left:18px;line-height:1.7;color:#334155;font-size:12px}
+  .action-list{display:grid;gap:8px;margin-top:8px}
+  .action-item{display:grid;grid-template-columns:86px 1fr;gap:10px;align-items:start;border:1px solid #edf1f7;background:#fbfdff;border-radius:6px;padding:9px 10px;font-size:12px}
+  .action-item b{color:#0f5bd6}
+  .action-item span{color:#334155;line-height:1.55}
+  .report-kicker{font-size:12px;color:#64748b;margin:8px 0 0;line-height:1.6}
+  .weekly-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0 0}
+  .weekly-tools .save-state{font-size:12px;color:#64748b}
+  #weeklySnapshot.editing [data-editable="weekly"]{outline:2px solid #bfdbfe;background:#fff}
+  #weeklySnapshot.editing [data-editable="weekly"]:focus{outline:2px solid #2563eb}
+  .lifecycle-card{margin-bottom:16px}
+  .lifecycle-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:10px}
+  .lifecycle-metric{border:1px solid #d7dee8;border-radius:6px;background:#fbfdff;padding:11px 12px}
+  .lifecycle-metric .t{font-size:11px;color:#64748b;font-weight:700}
+  .lifecycle-metric .v{font-size:20px;font-weight:800;color:#0f172a;margin-top:5px}
+  .lifecycle-metric .d{font-size:11px;color:#64748b;margin-top:3px}
+  .lifecycle-bar{height:14px;border-radius:999px;overflow:hidden;background:#eef2f7;display:flex;margin:8px 0 8px}
+  .lifecycle-bar span{height:100%;display:block}
+  .lifecycle-bar .new{background:#2563eb}
+  .lifecycle-bar .returning{background:#059669}
+  .lifecycle-bar .unknown{background:#94a3b8}
+  .lifecycle-legend{display:flex;gap:12px;flex-wrap:wrap;color:#64748b;font-size:11px}
+  .lifecycle-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
   .audience-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:10px}
   .audience{border:1px solid var(--line);border-radius:8px;padding:11px 12px;background:#fff;min-height:128px}
   .audience .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:7px}
@@ -195,16 +272,33 @@
   body[data-metric-view="share"] #plTable .m-conv,
   body[data-metric-view="share"] #plTable .m-aov,
   body[data-metric-view="share"] #plTable .m-imp{display:none}
-  @media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
+  @media(max-width:1200px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+  @media(max-width:1100px){.workbench-shelf{grid-template-columns:repeat(3,minmax(0,1fr))}}
   @media(max-width:1100px){.weekly-placeholder{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:1100px){.weekly-snapshot-grid,.weekly-mini-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:1100px){.weekly-insights{grid-template-columns:1fr}}
+  @media(max-width:1100px){.report-grid{grid-template-columns:1fr}}
+  @media(max-width:1100px){.lifecycle-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:1100px){.audience-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  @media(max-width:1500px){
-    .side-nav{position:sticky;top:0;width:auto;margin-bottom:12px;display:flex;gap:4px;align-items:center;overflow:auto}
-    .side-nav .nt{padding:4px 8px;white-space:nowrap}
-    .side-nav a{white-space:nowrap}
+  @media(max-width:900px){
+    .wrap{margin-left:0;padding:0 10px 24px}
+    header{margin:0 -10px;padding:14px 14px}
+    .side-nav{position:static;width:auto;margin:10px 0 12px;display:flex;gap:4px;align-items:center;overflow:auto;border:1px solid #d7dee8;border-radius:6px;padding:8px}
+    .side-nav .nt{padding:6px 8px;margin:0;border:0;white-space:nowrap;font-size:12px}
+    .side-nav .nt:after{display:none}
+    .workspace-nav{display:flex;gap:6px;margin:0}
+    .workspace-btn{min-width:116px;padding:8px 10px}
+    .workspace-btn span{display:none}
+    .sub-nav{display:flex;gap:4px;border:0;margin:0;padding:0}
+    .sub-nav .sub-title{display:none}
+    .side-nav a{white-space:nowrap;margin:0}
+    .kpis{grid-template-columns:1fr}
   }
   @media(max-width:900px){.insight-band{grid-template-columns:1fr}.insights,.health-grid{grid-template-columns:1fr}}
   @media(max-width:700px){.weekly-placeholder{grid-template-columns:1fr}}
+  @media(max-width:700px){.weekly-snapshot-grid,.weekly-mini-grid{grid-template-columns:1fr}}
+  @media(max-width:700px){.lifecycle-grid{grid-template-columns:1fr}}
+  @media(max-width:700px){.workbench-shelf{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:700px){.audience-grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -250,19 +344,39 @@
   </div>
 
   <nav class="side-nav">
-    <div class="nt">目录</div>
-    <a href="#overview">总览</a>
-    <a href="#weekly-sec">周报分析</a>
-    <a href="#trend-sec">账户趋势</a>
-    <a href="#pl-sec">负责人/品线</a>
-    <a href="#campaign-sec">广告系列</a>
-    <a href="#audience-sec">受众 & 关键词</a>
-    <a href="#shopify-sec">Shopify & SKU</a>
-    <a href="#anom-sec">异常提醒</a>
-    <a href="#auction-sec">竞品分析</a>
+    <div class="nt">工作台</div>
+    <div class="workspace-nav">
+      <button class="workspace-btn active" data-workspace-btn="dashboard"><b>数据看板</b><span>账户、品线、系列、受众、SKU</span></button>
+      <button class="workspace-btn" data-workspace-btn="reports"><b>周报月报</b><span>快照、复盘、行动建议</span></button>
+      <button class="workspace-btn" data-workspace-btn="competitor"><b>竞对分析</b><span>竞价洞察与展示份额</span></button>
+    </div>
+    <div class="sub-nav" data-subnav="dashboard">
+      <div class="sub-title">数据看板</div>
+      <a href="#overview">经营总览</a>
+      <a href="#trend-sec">账户趋势</a>
+      <a href="#lifecycle-sec">新老客结构</a>
+      <a href="#pl-sec">负责人·品线</a>
+      <a href="#campaign-sec">广告系列</a>
+      <a href="#audience-sec">受众 & 关键词</a>
+      <a href="#shopify-sec">Shopify & SKU</a>
+      <a href="#anom-sec">异常提醒</a>
+    </div>
+    <div class="sub-nav" data-subnav="reports" hidden>
+      <div class="sub-title">周报月报</div>
+      <a href="#weekly-sec">周报中心</a>
+    </div>
+    <div class="sub-nav" data-subnav="competitor" hidden>
+      <div class="sub-title">竞对分析</div>
+      <a href="#auction-sec">竞价分析</a>
+    </div>
   </nav>
 
-  <section id="overview" class="module-anchor">
+  <div class="workspace-hero" id="workspaceHero">
+    <h2>数据看板</h2>
+    <p>先看账户整体，再下钻到品线、广告系列、受众、关键词和站内 SKU。</p>
+  </div>
+
+  <section id="overview" class="module-anchor" data-workspace="dashboard">
   <div class="kpis" id="kpis"></div>
   <div id="compare-notice" style="margin:-6px 0 8px 0;font-size:12px;color:var(--accent);min-height:18px;"></div>
 
@@ -276,21 +390,22 @@
       <div class="health-grid" id="dataHealth"></div>
     </div>
   </div>
+  <div class="card lifecycle-card module-anchor" id="lifecycle-sec">
+    <h3>账户新老客结构 <span class="hint">Google Ads 细分：是新客户还是回头客 · 账户级，仅跟随日期范围</span></h3>
+    <div class="lifecycle-grid" id="lifecycleMetrics"></div>
+    <div class="lifecycle-bar" id="lifecycleBar"></div>
+    <div class="lifecycle-legend" id="lifecycleLegend"></div>
+  </div>
   </section>
 
-  <div class="module-divider"><span>01</span><b>周报与复盘</b></div>
-  <section class="card module-anchor weekly-card" id="weekly-sec">
-    <h3>周报分析 <span class="hint">预留模块 · 后续可接入周报结论、负责人复盘和品线行动项</span></h3>
-    <div class="weekly-placeholder">
-      <div class="weekly-slot"><div class="t">本周摘要</div><div class="v">预留本周核心变化、目标达成和主要风险。</div></div>
-      <div class="weekly-slot"><div class="t">机会品线</div><div class="v">预留高 ROI、高承接或可加预算的品线判断。</div></div>
-      <div class="weekly-slot"><div class="t">问题广告</div><div class="v">预留花费异常、ROI 下滑、库存或素材问题。</div></div>
-      <div class="weekly-slot"><div class="t">下周动作</div><div class="v">预留负责人、优先级、预计影响和跟进状态。</div></div>
-    </div>
+  <div class="module-divider" data-workspace="reports"><span>01</span><b>周报与复盘</b><i class="slot-tag">预留插槽</i></div>
+  <section class="card module-anchor weekly-card" id="weekly-sec" data-workspace="reports">
+    <h3>周报分析 <span class="hint">每周五 12:00 固定拉取上周五至本周四广告快照，快照留存后用于环比</span></h3>
+    <div id="weeklySnapshot"></div>
   </section>
 
-  <div class="module-divider"><span>02</span><b>账户趋势</b></div>
-  <div class="grid module-anchor" id="trend-sec">
+  <div class="module-divider" data-workspace="dashboard"><span>02</span><b>账户趋势</b></div>
+  <div class="grid module-anchor" id="trend-sec" data-workspace="dashboard">
     <div class="card">
       <h3 style="gap:10px">趋势图 <span class="hint" id="trend-hint">当前指标: <b>费用</b> · 点击切换</span>
         <button class="btn" id="trend-cross" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">交叉视图</button>
@@ -304,8 +419,8 @@
   </div>
 
   <!-- 新老广告环比 -->
-  <div class="module-divider"><span>03</span><b>经营明细</b></div>
-  <div class="card module-anchor" id="newold-sec">
+  <div class="module-divider" data-workspace="dashboard"><span>03</span><b>经营明细</b></div>
+  <div class="card module-anchor" id="newold-sec" data-workspace="dashboard">
     <h3 style="gap:10px">新老广告环比 <span class="hint">按广告系列名中的上线日期（YYMMDD）计算：距期末 ≤90 天为新广告，>90 天为老广告</span>
       <button class="btn" onclick="exportNewOld()" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">导出CSV</button></h3>
     <div class="wrap-card" style="max-height:260px">
@@ -331,7 +446,7 @@
     </div>
   </div>
 
-  <div class="stack">
+  <div class="stack" data-workspace="dashboard">
     <div class="card module-anchor" id="pl-sec">
       <h3 style="gap:10px">品线汇总 <span class="hint">点击行筛选该品线 · 表头与广告系列效果保持一致</span>
         <button class="btn" onclick="exportTable('plTable','品线汇总')" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">导出CSV</button></h3>
@@ -409,8 +524,8 @@
     </div>
   </div>
 
-  <div class="module-divider"><span>04</span><b>受众与关键词</b></div>
-  <div class="card module-anchor" id="audience-sec">
+  <div class="module-divider" data-workspace="dashboard"><span>04</span><b>受众与关键词</b><i class="slot-tag">Google Ads 报告</i></div>
+  <div class="card module-anchor" id="audience-sec" data-workspace="dashboard">
     <h3>受众人群分析 <span class="hint">Google Ads 已保存报告「细分受众群-LFY」 · 跟随当前筛选/广告系列</span></h3>
     <div class="audience-grid" id="audienceSegments"></div>
     <div class="audience-table-wrap"><table id="audienceTable"><thead><tr>
@@ -420,7 +535,7 @@
   </div>
 
   <!-- 关键词分析 -->
-  <div class="card module-anchor" id="keyword-sec">
+  <div class="card module-anchor" id="keyword-sec" data-workspace="dashboard">
     <h3 style="gap:10px">关键词分析 <span class="hint" id="kw-hint">搜索字词 · 跟随当前筛选/广告系列</span>
       <button class="btn" onclick="exportKeywordAll()" style="margin-left:auto;height:24px;padding:0 10px;font-size:11px">导出CSV</button></h3>
     <div class="wrap-card" style="max-height:480px">
@@ -443,14 +558,14 @@
     </div>
   </div>
 
-  <div class="module-divider"><span>05</span><b>风险与竞争</b></div>
-  <div class="card module-anchor" id="anom-sec">
+  <div class="module-divider" data-workspace="dashboard"><span>05</span><b>风险提醒</b><i class="slot-tag">可继续扩展</i></div>
+  <div class="card module-anchor" id="anom-sec" data-workspace="dashboard">
     <h3>异常提醒 <span class="hint">近半月 vs 前半月 · 仅状态 ENABLED 的系列 · 阈值：花费降超30% / 销售额降超25% / ROI跌破1</span></h3>
     <div class="anom" id="anom"></div>
   </div>
 
-  <div class="section-title module-anchor" id="auction-sec" style="margin-top:18px">竞品分析 · 竞价洞察 <span style="font-size:12px;color:var(--sub);font-weight:400">账户级月度 · 与上方品线/系列筛选相互独立</span></div>
-  <div class="card">
+  <div class="section-title module-anchor" id="auction-sec" data-workspace="competitor" style="margin-top:18px">竞品分析 · 竞价洞察 <span style="font-size:12px;color:var(--sub);font-weight:400">账户级月度 · 与上方品线/系列筛选相互独立</span></div>
+  <div class="card" data-workspace="competitor">
     <div style="display:flex;gap:14px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
       <div class="f" style="flex-direction:row;align-items:center;gap:6px"><label style="margin:0">广告类型</label>
         <select id="auc-type" style="height:30px;border:1px solid var(--line);border-radius:8px;padding:0 8px;font-size:13px">
@@ -483,7 +598,7 @@
 </div>
 
 <script>
-const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608070924"};
+const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608081131"};
 let DASHBOARD_DATA = null;
 let D = null;
 
@@ -863,6 +978,273 @@ function renderDataHealth(){
     ['未匹配 Shopify 类目', fmtNum(unmatchedCount), '影响品线级站内对比覆盖']
   ];
   el.innerHTML=health.map(([t,v,d])=>`<div class="health"><div class="t">${esc(t)}</div><div class="v">${esc(v)}</div><div class="d">${esc(d)}</div></div>`).join('');
+}
+function renderCustomerLifecycle(){
+  const box=document.getElementById('lifecycleMetrics');
+  const bar=document.getElementById('lifecycleBar');
+  const legend=document.getElementById('lifecycleLegend');
+  if(!box || !bar || !legend) return;
+  const rows=(D.customerLifecycle||[]).filter(r=>r.date && inRange(r.date,state.start,state.end));
+  if(!rows.length){
+    box.innerHTML='<div class="empty">当前日期范围内暂无 Google Ads 新老客细分数据</div>';
+    bar.innerHTML=''; legend.innerHTML='';
+    return;
+  }
+  const bucket={new:{label:'新客整体',conv:0,val:0},returning:{label:'回头客',conv:0,val:0},unknown:{label:'未知/其他',conv:0,val:0}};
+  rows.forEach(r=>{
+    const code=String(r.code||'').toUpperCase();
+    const name=String(r.customerType||'');
+    let k='unknown';
+    if(code.includes('RETURNING') || name.includes('回头')) k='returning';
+    else if(code.includes('NEW') || name.includes('新客户')) k='new';
+    bucket[k].conv += +r.conv||0;
+    bucket[k].val += +r.val||0;
+  });
+  const totalVal=Object.values(bucket).reduce((s,x)=>s+x.val,0);
+  const totalConv=Object.values(bucket).reduce((s,x)=>s+x.conv,0);
+  const share=(v,t)=>t? v/t : 0;
+  const newShare=share(bucket.new.val,totalVal), returningShare=share(bucket.returning.val,totalVal), unknownShare=share(bucket.unknown.val,totalVal);
+  const cards=[
+    ['新客价值占比', fmtPct(newShare), `${fmtMoney(bucket.new.val)} · ${fmtNum(bucket.new.conv)} 次转化`],
+    ['回头客价值占比', fmtPct(returningShare), `${fmtMoney(bucket.returning.val)} · ${fmtNum(bucket.returning.conv)} 次转化`],
+    ['未知/其他占比', fmtPct(unknownShare), `${fmtMoney(bucket.unknown.val)} · ${fmtNum(bucket.unknown.conv)} 次转化`],
+    ['账户购买转化', fmtMoney(totalVal), `${fmtNum(totalConv)} 次 · 仅 Purchase 生命周期细分`],
+  ];
+  box.innerHTML=cards.map(([t,v,d])=>`<div class="lifecycle-metric"><div class="t">${t}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join('');
+  bar.innerHTML=`<span class="new" style="width:${(newShare*100).toFixed(2)}%"></span><span class="returning" style="width:${(returningShare*100).toFixed(2)}%"></span><span class="unknown" style="width:${(unknownShare*100).toFixed(2)}%"></span>`;
+  legend.innerHTML=`<span><i style="background:#2563eb"></i>新客整体 ${fmtPct(newShare)}</span><span><i style="background:#059669"></i>回头客 ${fmtPct(returningShare)}</span><span><i style="background:#94a3b8"></i>未知/其他 ${fmtPct(unknownShare)}</span>`;
+}
+function renderWeeklySnapshot(){
+  const el=document.getElementById('weeklySnapshot');
+  if(!el) return;
+  const snaps=[...(D.weeklySnapshots||[])].sort((a,b)=>String(a.periodEnd||'').localeCompare(String(b.periodEnd||'')));
+  if(!snaps.length){
+    el.innerHTML=`<div class="weekly-placeholder">
+      <div class="weekly-slot"><div class="t">等待首期快照</div><div class="v">每周五 12:00 固定拉取上周五至本周四广告数据。</div></div>
+      <div class="weekly-slot"><div class="t">留存口径</div><div class="v">快照文件不会覆盖历史，用于后续周报环比。</div></div>
+      <div class="weekly-slot"><div class="t">分析结构</div><div class="v">整体表现、原因分析、亮点难点、品线上升下降、下周动作。</div></div>
+      <div class="weekly-slot"><div class="t">月报预留</div><div class="v">月度快照会放在同一个中心里切换。</div></div>
+    </div>`;
+    return;
+  }
+  const daysOf=snap=>{
+    const a=new Date((snap.periodStart||'')+'T00:00:00');
+    const b=new Date((snap.periodEnd||'')+'T00:00:00');
+    if(Number.isNaN(+a)||Number.isNaN(+b)) return 0;
+    return Math.round((b-a)/86400000)+1;
+  };
+  const firstWeekly=[...snaps].reverse().find(x=>daysOf(x)===7) || snaps[snaps.length-1];
+  const selectedKey=state.weeklyKey || `${firstWeekly.periodStart}|${firstWeekly.periodEnd}`;
+  const cur=snaps.find(x=>`${x.periodStart}|${x.periodEnd}`===selectedKey) || firstWeekly;
+  state.weeklyKey=`${cur.periodStart}|${cur.periodEnd}`;
+  const curDays=daysOf(cur);
+  const prev=[...snaps].reverse().find(x=>x.periodEnd<cur.periodStart && daysOf(x)===curDays) || null;
+  const s0=cur.summary||{}, p0=prev?prev.summary||{}:{};
+  const num=(r,k)=>+((r||{})[k]||0);
+  const pctDelta=(a,b)=>b ? (a-b)/Math.abs(b) : null;
+  const trendObj=(a,b,goodUp=true,unit='%')=>{
+    const d=pctDelta(a,b);
+    if(d===null) return {d:null, txt:'暂无同口径上一期', cls:'flat'};
+    const up=d>=0;
+    return {d, txt:`${up?'▲':'▼'}${Math.abs(d*100).toFixed(1)}${unit}`, cls:(up===goodUp)?'up':'down'};
+  };
+  const card=(t,v,c)=>`<div class="weekly-metric"><div class="t">${t}</div><div class="v">${v}</div><div class="d ${c.cls}">${c.txt}</div></div>`;
+  const mergeRows=(rows,key)=>{
+    const m={};
+    (rows||[]).forEach(r=>{
+      const k=r[key]||'未分类';
+      const o=m[k]=m[k]||{[key]:k, '广告负责人':r['广告负责人']||'', '运营人员':r['运营人员']||'', '展示':0, '点击':0, '花费':0, '转化次数':0, '转化价值':0};
+      ['展示','点击','花费','转化次数','转化价值'].forEach(f=>o[f]+=num(r,f));
+      if(!o['广告负责人'] && r['广告负责人']) o['广告负责人']=r['广告负责人'];
+      if(!o['运营人员'] && r['运营人员']) o['运营人员']=r['运营人员'];
+    });
+    Object.values(m).forEach(o=>{
+      o['ROI']=o['花费']?o['转化价值']/o['花费']:0;
+      o['CPC']=o['点击']?o['花费']/o['点击']:0;
+      o['CPA']=o['转化次数']?o['花费']/o['转化次数']:0;
+      o['CTR']=o['展示']?o['点击']/o['展示']:0;
+      o['CVR']=o['点击']?o['转化次数']/o['点击']:0;
+    });
+    return Object.values(m);
+  };
+  const rowMap=(rows,key)=>Object.fromEntries(mergeRows(rows,key).map(r=>[r[key]||'未分类',r]));
+  const byPl=mergeRows(cur.byPl||[],'品线').sort((a,b)=>num(b,'花费')-num(a,'花费'));
+  const byOwner=[...(cur.byOwner||[])].sort((a,b)=>num(b,'花费')-num(a,'花费'));
+  const byNewOld=[...(cur.byNewOld||[])].sort((a,b)=>num(b,'花费')-num(a,'花费'));
+  const prevPl=rowMap(prev?prev.byPl:[],'品线');
+  const prevOwner=rowMap(prev?prev.byOwner:[],'广告负责人');
+  const prevNewOld=rowMap(prev?prev.byNewOld:[],'新老广告');
+  const share=(v,total)=>total? v/total : 0;
+  const comparePl=byPl.map(r=>{
+    const k=r['品线']||'未分类', pr=prevPl[k]||{};
+    const roiD=pctDelta(num(r,'ROI'),num(pr,'ROI'));
+    const valD=pctDelta(num(r,'转化价值'),num(pr,'转化价值'));
+    const costD=pctDelta(num(r,'花费'),num(pr,'花费'));
+    const cvrD=pctDelta(num(r,'CVR'),num(pr,'CVR'));
+    const cpcD=pctDelta(num(r,'CPC'),num(pr,'CPC'));
+    const cpaD=pctDelta(num(r,'CPA'),num(pr,'CPA'));
+    return {k,r,pr,roiD,valD,costD,cvrD,cpcD,cpaD};
+  });
+  const ratingOf=x=>{
+    if(!x.pr || !Object.keys(x.pr).length) return {label:'新增', cls:'new'};
+    if(num(x.r,'ROI')<1.2 && num(x.r,'花费')>=500) return {label:'差', cls:'bad'};
+    if((x.roiD??0)<=-0.2 || (x.cvrD??0)<=-0.2 || (x.cpaD??0)>=0.25) return {label:'需关注', cls:'watch'};
+    if(num(x.r,'ROI')>=2.5 && (x.roiD??0)>=0) return {label:'优', cls:'good'};
+    if(num(x.r,'ROI')>=1.8) return {label:'良', cls:'ok'};
+    return {label:'需关注', cls:'watch'};
+  };
+  const causeOf=x=>{
+    if(!x.pr || !Object.keys(x.pr).length) return '新增/恢复投放，先观察转化质量和花费承接。';
+    const parts=[];
+    if((x.valD??0)>0.15) parts.push('转化价值增长');
+    if((x.valD??0)<-0.15) parts.push('转化价值下滑');
+    if((x.costD??0)>0.15) parts.push('花费放大');
+    if((x.costD??0)<-0.15) parts.push('花费收缩');
+    if((x.cvrD??0)>0.12) parts.push('CVR改善');
+    if((x.cvrD??0)<-0.12) parts.push('CVR走弱');
+    if((x.cpcD??0)>0.12) parts.push('CPC上涨');
+    if((x.cpcD??0)<-0.12) parts.push('CPC下降');
+    if(!parts.length) parts.push('核心指标小幅波动');
+    return parts.join('，') + '。';
+  };
+  const actionOf=x=>{
+    const roi=num(x.r,'ROI'), cost=num(x.r,'花费');
+    if(roi>=2.5 && (x.roiD??0)>=0) return '保留预算优先级，挑高转化系列扩预算 10%-20%，同步扩词/补 Feed。';
+    if((x.roiD??0)<=-0.2 && cost>=500) return '先查搜索词、受众和落地页，暂停低转化素材/词包，预算回收 10%-15%。';
+    if((x.cvrD??0)<=-0.2) return '重点看点击后的承接，检查落地页、价格、库存和产品匹配。';
+    if((x.cpcD??0)>=0.15 && (x.valD??0)<=0) return '控制出价，排查竞价抬升和无效流量，优先否词。';
+    return '维持观察，按系列 ROI 和搜索词质量做小幅调预算。';
+  };
+  const rise=comparePl.filter(x=>x.pr && x.roiD!==null).sort((a,b)=>(b.roiD-a.roiD)).slice(0,5);
+  const fall=comparePl.filter(x=>x.pr && x.roiD!==null).sort((a,b)=>(a.roiD-b.roiD)).slice(0,5);
+  const highlights=comparePl.filter(x=>num(x.r,'ROI')>=2 && ((x.roiD??0)>0 || (x.valD??0)>0.15)).sort((a,b)=>num(b.r,'转化价值')-num(a.r,'转化价值')).slice(0,4);
+  const difficulties=comparePl.filter(x=>num(x.r,'花费')>=300 && (num(x.r,'ROI')<1.5 || (x.roiD??0)<-0.2 || (x.cvrD??0)<-0.2)).sort((a,b)=>num(b.r,'花费')-num(a.r,'花费')).slice(0,4);
+  const options=snaps.map(x=>`<option value="${esc(`${x.periodStart}|${x.periodEnd}`)}" ${`${x.periodStart}|${x.periodEnd}`===state.weeklyKey?'selected':''}>${x.periodStart} ~ ${x.periodEnd}${daysOf(x)===7?' 周报':' 月报/自定义'}</option>`).join('');
+  const roiT=trendObj(num(s0,'ROI'),num(p0,'ROI'),true);
+  const valT=trendObj(num(s0,'转化价值'),num(p0,'转化价值'),true);
+  const costT=trendObj(num(s0,'花费'),num(p0,'花费'),false);
+  const cpaT=trendObj(num(s0,'CPA'),num(p0,'CPA'),false);
+  const summaryLines=[];
+  summaryLines.push(`本期花费 ${fmtMoney(num(s0,'花费'))}，转化价值 ${fmtMoney(num(s0,'转化价值'))}，ROI ${num(s0,'ROI').toFixed(2)}，CPA ${fmtMoney(num(s0,'CPA'))}。`);
+  if(prev){
+    summaryLines.push(`环比上期 ${prev.periodStart}~${prev.periodEnd}：ROI ${roiT.txt}，转化价值 ${valT.txt}，花费 ${costT.txt}，CPA ${cpaT.txt}。`);
+  }else{
+    summaryLines.push('当前没有同周期上一期快照，环比分析将在下一期自动补齐。');
+  }
+  const reasonLines=[];
+  if(prev){
+    if((valT.d??0)>0 && (costT.d??0)>0) reasonLines.push('账户增长主要来自预算/流量放大，需要继续观察新增花费是否保持同等转化效率。');
+    if((valT.d??0)>0 && (costT.d??0)<=0) reasonLines.push('转化价值增长同时花费未明显增加，说明本期流量质量或转化承接更好。');
+    if((roiT.d??0)<0) reasonLines.push('ROI 下滑说明新增花费没有完全转化为等比例销售，需要优先排查高花费低回报品线。');
+    if((cpaT.d??0)>0) reasonLines.push('CPA 上升，可能由 CPC 抬升、CVR 走弱或低意向流量占比提升导致。');
+  }
+  comparePl.slice().sort((a,b)=>Math.abs((b.roiD||0))-Math.abs((a.roiD||0))).slice(0,3).forEach(x=>reasonLines.push(`${x.k}：${causeOf(x)}`));
+  if(!reasonLines.length) reasonLines.push('本期缺少同口径上一期，先按 ROI、CVR、CPA 识别重点品线。');
+  const list=(arr,empty,mapper)=>arr.length?arr.map(mapper):[empty];
+  const plTableRows=comparePl.slice().sort((a,b)=>num(b.r,'花费')-num(a.r,'花费')).slice(0,12).map(x=>{
+    const rt=ratingOf(x), roi=trendObj(num(x.r,'ROI'),num(x.pr,'ROI'),true), val=trendObj(num(x.r,'转化价值'),num(x.pr,'转化价值'),true);
+    return `<tr><td>${esc(x.k)}</td><td><span class="rating ${rt.cls}">${rt.label}</span></td><td>${num(x.r,'ROI').toFixed(2)}</td><td><span class="delta ${roi.cls}">${roi.txt}</span></td><td>${fmtMoney(num(x.r,'花费'))}</td><td>${fmtMoney(num(x.r,'转化价值'))}</td><td><span class="delta ${val.cls}">${val.txt}</span></td><td>${fmtPct(num(x.r,'CVR'))}</td><td>${fmtMoney(num(x.r,'CPA'))}</td><td>${esc(causeOf(x))}</td></tr>`;
+  }).join('');
+  const moveRows=(arr,type)=>arr.map(x=>{
+    const roi=trendObj(num(x.r,'ROI'),num(x.pr,'ROI'),true), val=trendObj(num(x.r,'转化价值'),num(x.pr,'转化价值'),true);
+    return `<tr><td>${esc(x.k)}</td><td>${type}</td><td>${num(x.r,'ROI').toFixed(2)}</td><td><span class="delta ${roi.cls}">${roi.txt}</span></td><td>${fmtMoney(num(x.r,'转化价值'))}</td><td><span class="delta ${val.cls}">${val.txt}</span></td><td>${esc(causeOf(x))}</td></tr>`;
+  }).join('');
+  const newOldRows=byNewOld.map(r=>{
+    const k=r['新老广告']||'未分类', pr=prevNewOld[k]||{}, rt=trendObj(num(r,'ROI'),num(pr,'ROI'),true), vt=trendObj(num(r,'转化价值'),num(pr,'转化价值'),true);
+    return `<tr><td>${esc(k)}</td><td>${num(r,'ROI').toFixed(2)}</td><td><span class="delta ${rt.cls}">${rt.txt}</span></td><td>${fmtMoney(num(r,'花费'))}</td><td>${fmtMoney(num(r,'转化价值'))}</td><td><span class="delta ${vt.cls}">${vt.txt}</span></td><td>${fmtPct(share(num(r,'花费'),num(s0,'花费')))}</td></tr>`;
+  }).join('');
+  const ownerRows=byOwner.slice(0,8).map(r=>{
+    const k=r['广告负责人']||'未分配', pr=prevOwner[k]||{}, rt=trendObj(num(r,'ROI'),num(pr,'ROI'),true);
+    return `<tr><td>${esc(k)}</td><td>${fmtMoney(num(r,'花费'))}</td><td>${fmtMoney(num(r,'转化价值'))}</td><td>${num(r,'ROI').toFixed(2)}</td><td><span class="delta ${rt.cls}">${rt.txt}</span></td><td>${fmtNum(num(r,'转化次数'))}</td></tr>`;
+  }).join('');
+  const actionTargets=[...difficulties, ...highlights].slice(0,6);
+  const actionRows=actionTargets.length?actionTargets.map(x=>`<div class="action-item"><b>${esc(x.k)}</b><span>${esc(actionOf(x))}</span></div>`).join(''):`<div class="action-item"><b>账户</b><span>本期先积累基线，下周生成新快照后按品线环比制定动作。</span></div>`;
+  el.innerHTML=`
+    <div class="weekly-head">
+      <div class="hint">快照周期：${cur.periodStart} ~ ${cur.periodEnd} · ${curDays} 天 · ${cur.rows||0} 行广告系列数据 · 上期：${prev?`${prev.periodStart} ~ ${prev.periodEnd}`:'暂无'}</div>
+      <label class="hint">切换周期 <select id="weeklySelect">${options}</select></label>
+    </div>
+    <div class="weekly-tools">
+      <button class="btn tiny" id="weeklyEditBtn">编辑周报</button>
+      <button class="btn tiny" id="weeklySaveBtn" hidden>保存修改</button>
+      <button class="btn tiny" id="weeklyCancelBtn" hidden>退出编辑</button>
+      <button class="btn tiny" id="weeklyResetBtn">恢复自动稿</button>
+      <span class="save-state" id="weeklySaveState"></span>
+    </div>
+    <div class="weekly-snapshot-grid">
+      ${card('花费',fmtMoney(num(s0,'花费')),costT)}
+      ${card('转化价值',fmtMoney(num(s0,'转化价值')),valT)}
+      ${card('ROI',num(s0,'ROI').toFixed(2),roiT)}
+      ${card('CPA',fmtMoney(num(s0,'CPA')),cpaT)}
+    </div>
+    <div class="report-grid">
+      <div class="report-block" data-editable="weekly"><h4>整体结论</h4><ul>${summaryLines.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+      <div class="report-block" data-editable="weekly"><h4>原因分析</h4><ul>${reasonLines.slice(0,6).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+      <div class="report-block" data-editable="weekly"><h4>本周亮点</h4><ul>${list(highlights,'暂无明显亮点品线，优先保持稳定并观察新快照。',x=>`${x.k}：ROI ${num(x.r,'ROI').toFixed(2)}，${causeOf(x)}`).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+      <div class="report-block" data-editable="weekly"><h4>本周难点</h4><ul>${list(difficulties,'暂无明显难点品线。',x=>`${x.k}：ROI ${num(x.r,'ROI').toFixed(2)}，${causeOf(x)}`).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+    </div>
+    <div class="weekly-section"><h4>上升品线 / 下降品线</h4><div class="weekly-table-wrap"><table class="weekly-table"><thead><tr><th>品线</th><th>方向</th><th>ROI</th><th>ROI环比</th><th>转化价值</th><th>转化价值环比</th><th>主要原因</th></tr></thead><tbody>${moveRows(rise,'上升') + moveRows(fall,'下降') || '<tr><td colspan="7" class="hint">暂无同口径品线环比</td></tr>'}</tbody></table></div></div>
+    <div class="weekly-section"><h4>品线复盘明细 Top 12</h4><div class="weekly-table-wrap"><table class="weekly-table"><thead><tr><th>品线</th><th>评级</th><th>ROI</th><th>ROI环比</th><th>花费</th><th>转化价值</th><th>价值环比</th><th>CVR</th><th>CPA</th><th>判断</th></tr></thead><tbody>${plTableRows || '<tr><td colspan="10" class="hint">暂无品线快照</td></tr>'}</tbody></table></div></div>
+    <div class="weekly-section"><h4>新老广告表现</h4><div class="weekly-table-wrap"><table class="weekly-table"><thead><tr><th>系列</th><th>ROI</th><th>ROI环比</th><th>花费</th><th>转化价值</th><th>价值环比</th><th>花费占比</th></tr></thead><tbody>${newOldRows || '<tr><td colspan="7" class="hint">暂无新老广告快照</td></tr>'}</tbody></table></div></div>
+    <div class="weekly-section"><h4>负责人复盘</h4><div class="weekly-table-wrap"><table class="weekly-table"><thead><tr><th>负责人</th><th>花费</th><th>转化价值</th><th>ROI</th><th>ROI环比</th><th>转化次数</th></tr></thead><tbody>${ownerRows || '<tr><td colspan="6" class="hint">暂无负责人快照</td></tr>'}</tbody></table></div></div>
+    <div class="weekly-section"><h4>下周操作建议</h4><div class="action-list" data-editable="weekly">${actionRows}</div><p class="report-kicker">建议在周五快照稳定后定稿；如果周内临时查看，本模块仍会按已留存快照口径，不受后台数据顺延影响。</p></div>`;
+  const sel=document.getElementById('weeklySelect');
+  if(sel) sel.addEventListener('change',()=>{state.weeklyKey=sel.value;renderWeeklySnapshot();});
+  applyWeeklyDraft(cur);
+  bindWeeklyEditing(cur);
+}
+function weeklyDraftKey(cur){
+  return 'evilenergy_weekly_draft_' + (cur.periodStart||'') + '_' + (cur.periodEnd||'');
+}
+function setWeeklyEditing(on){
+  const box=document.getElementById('weeklySnapshot');
+  if(!box) return;
+  box.classList.toggle('editing', !!on);
+  box.querySelectorAll('[data-editable="weekly"]').forEach(node=>{
+    node.contentEditable = on ? 'true' : 'false';
+  });
+  const edit=document.getElementById('weeklyEditBtn'), save=document.getElementById('weeklySaveBtn'), cancel=document.getElementById('weeklyCancelBtn');
+  if(edit) edit.hidden=!!on;
+  if(save) save.hidden=!on;
+  if(cancel) cancel.hidden=!on;
+}
+function applyWeeklyDraft(cur){
+  const box=document.getElementById('weeklySnapshot');
+  if(!box) return;
+  const raw=localStorage.getItem(weeklyDraftKey(cur));
+  const stateEl=document.getElementById('weeklySaveState');
+  if(!raw){ if(stateEl) stateEl.textContent='当前为自动稿'; return; }
+  try{
+    const draft=JSON.parse(raw);
+    const nodes=[...box.querySelectorAll('[data-editable="weekly"]')];
+    (draft.blocks||[]).forEach((html,i)=>{ if(nodes[i]) nodes[i].innerHTML=html; });
+    if(stateEl) stateEl.textContent='已加载人工修改稿' + (draft.savedAt ? ' · ' + draft.savedAt : '');
+  }catch(e){
+    if(stateEl) stateEl.textContent='人工稿读取失败，当前为自动稿';
+  }
+}
+function saveWeeklyDraft(cur){
+  const box=document.getElementById('weeklySnapshot');
+  if(!box) return;
+  const blocks=[...box.querySelectorAll('[data-editable="weekly"]')].map(node=>node.innerHTML);
+  const savedAt=new Date().toLocaleString('zh-CN',{hour12:false});
+  localStorage.setItem(weeklyDraftKey(cur), JSON.stringify({savedAt, blocks}));
+  const stateEl=document.getElementById('weeklySaveState');
+  if(stateEl) stateEl.textContent='已保存人工修改稿 · ' + savedAt;
+  setWeeklyEditing(false);
+}
+function resetWeeklyDraft(cur){
+  if(!confirm('恢复自动稿会清除当前周期已保存的人工修改，确定继续吗？')) return;
+  localStorage.removeItem(weeklyDraftKey(cur));
+  renderWeeklySnapshot();
+}
+function bindWeeklyEditing(cur){
+  setWeeklyEditing(false);
+  const edit=document.getElementById('weeklyEditBtn'), save=document.getElementById('weeklySaveBtn'), cancel=document.getElementById('weeklyCancelBtn'), reset=document.getElementById('weeklyResetBtn');
+  if(edit) edit.onclick=()=>setWeeklyEditing(true);
+  if(save) save.onclick=()=>saveWeeklyDraft(cur);
+  if(cancel) cancel.onclick=()=>{renderWeeklySnapshot();};
+  if(reset) reset.onclick=()=>resetWeeklyDraft(cur);
 }
 function renderAudienceSegments(){
   const el=document.getElementById('audienceSegments');
@@ -1564,10 +1946,49 @@ function renderTags(){
 // ---------- master render ----------
 function renderAll(){
   document.getElementById('daterange').textContent=`${state.start} ~ ${state.end}`;
-  renderKPI(); renderInsights(); renderDataHealth(); renderAudienceSegments(); renderTrend(); renderTypePie();
+  renderKPI(); renderInsights(); renderDataHealth(); renderCustomerLifecycle(); renderWeeklySnapshot(); renderAudienceSegments(); renderTrend(); renderTypePie();
   renderCampaignTable(); renderNewOldTable(); renderKeywordTable(); renderPlTable(); renderCompare(); renderAnomaly(); renderTags();
   renderCrumb(); renderDrill();
   refreshTableTools();
+}
+
+const workspaceCopy = {
+  dashboard: ['数据看板', '先看账户整体，再下钻到品线、广告系列、受众、关键词和站内 SKU。'],
+  reports: ['周报月报', '沉淀每周五固定快照，集中看周报复盘、月报汇总和后续行动建议。'],
+  competitor: ['竞对分析', '集中查看 Google Ads 竞价洞察、展示份额、排名胜出率和竞品变化。']
+};
+function setWorkspace(ws='dashboard', anchor){
+  state.workspace = ws;
+  document.body.dataset.workspace = ws;
+  document.querySelectorAll('[data-workspace]').forEach(el=>{
+    el.hidden = el.dataset.workspace !== ws;
+  });
+  document.querySelectorAll('[data-workspace-btn]').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.workspaceBtn===ws);
+  });
+  document.querySelectorAll('[data-subnav]').forEach(nav=>{
+    nav.hidden = nav.dataset.subnav !== ws;
+  });
+  const hero=document.getElementById('workspaceHero');
+  if(hero){
+    const copy=workspaceCopy[ws] || workspaceCopy.dashboard;
+    hero.querySelector('h2').textContent=copy[0];
+    hero.querySelector('p').textContent=copy[1];
+  }
+  const target = anchor ? document.querySelector(anchor) : null;
+  if(target) target.scrollIntoView({block:'start'});
+  else window.scrollTo({top:0});
+  setTimeout(()=>{
+    if(trendChart) trendChart.resize();
+    if(typeChart) typeChart.resize();
+    if(aucTrendChart) aucTrendChart.resize();
+    if(aucRankChart) aucRankChart.resize();
+  },80);
+}
+function workspaceFromHash(hash){
+  if(['#weekly-sec'].includes(hash)) return 'reports';
+  if(['#auction-sec'].includes(hash)) return 'competitor';
+  return 'dashboard';
 }
 
 // ---------- CSV 导出（导出当前筛选+排序后的表格）----------
@@ -1678,6 +2099,14 @@ function initFilters(){
     document.body.dataset.metricView=metricView;
     document.querySelectorAll('#metric-switch [data-view]').forEach(b=>b.classList.toggle('active', b.dataset.view===metricView));
     renderKPI();
+  });
+  document.querySelectorAll('[data-workspace-btn]').forEach(btn=>btn.onclick=()=>{
+    const ws=btn.dataset.workspaceBtn || 'dashboard';
+    setWorkspace(ws);
+  });
+  document.querySelectorAll('[data-subnav] a').forEach(a=>a.onclick=()=>{
+    const nav=a.closest('[data-subnav]');
+    if(nav) setWorkspace(nav.dataset.subnav || 'dashboard', a.getAttribute('href'));
   });
 }
 
@@ -1960,6 +2389,7 @@ function boot(){
   initFilters();
   initAuction();
   renderAll();
+  setWorkspace(state.workspace || workspaceFromHash(location.hash));
 }
 function startApp(data){
   decodeArrays(data);

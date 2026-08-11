@@ -64,6 +64,7 @@
   #plTable .m-cost,#campTable .m-cost{background:#fffdf7}
   #plTable .m-val,#campTable .m-val{background:#f8fffb}
   #plTable .m-share,#campTable .m-share{background:#faf8ff}
+  #plTable tr.summary-row td{background:#f3f7ff;font-weight:800;border-bottom:1px solid #d8e3f5}
   #plTable td:has(.chg),#campTable td:has(.chg),#newoldTable td:has(.chg){min-width:64px;padding-left:4px;padding-right:4px;text-align:center}
   .table-scroll{position:relative}
   .table-scroll:after{content:"";position:absolute;right:0;top:0;bottom:0;width:22px;pointer-events:none;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.92))}
@@ -598,7 +599,7 @@
 </div>
 
 <script>
-const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608101014"};
+const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608110950"};
 let DASHBOARD_DATA = null;
 let D = null;
 
@@ -1169,6 +1170,7 @@ function renderWeeklySnapshot(){
       <button class="btn tiny" id="weeklySaveBtn" hidden>保存修改</button>
       <button class="btn tiny" id="weeklyCancelBtn" hidden>退出编辑</button>
       <button class="btn tiny" id="weeklyResetBtn">恢复自动稿</button>
+      <button class="btn tiny" id="weeklyExportBtn">导出快照CSV</button>
       <span class="save-state" id="weeklySaveState"></span>
     </div>
     <div class="weekly-snapshot-grid">
@@ -1238,13 +1240,43 @@ function resetWeeklyDraft(cur){
   localStorage.removeItem(weeklyDraftKey(cur));
   renderWeeklySnapshot();
 }
+function exportWeeklySnapshot(cur){
+  const columns = ['品线','广告负责人','运营人员','新老广告','广告系列ID','广告系列','展示','点击','花费','转化次数','转化价值','ROI','CPC','CPA','CTR','CVR'];
+  const csvCell=v=>{
+    let t = v==null ? '' : String(v);
+    if(t.includes(',') || t.includes('"') || t.includes('\n')) t='"'+t.replace(/"/g,'""')+'"';
+    return t;
+  };
+  const pushSection=(out,title,rows,cols)=>{
+    out.push([title].map(csvCell).join(','));
+    out.push(cols.map(csvCell).join(','));
+    (rows||[]).forEach(r=>out.push(cols.map(c=>csvCell(r[c])).join(',')));
+    out.push('');
+  };
+  const summary = cur.summary || {};
+  const out = [];
+  out.push(['EVILENERGY 周报快照', `${cur.periodStart || ''} ~ ${cur.periodEnd || ''}`].map(csvCell).join(','));
+  out.push('');
+  pushSection(out,'账户汇总',[summary],['展示','点击','花费','转化次数','转化价值','ROI','CPC','CPA','CTR','CVR']);
+  pushSection(out,'品线汇总',cur.byPl||[],['品线','广告负责人','运营人员','展示','点击','花费','转化次数','转化价值','ROI','CPC','CPA','CTR','CVR']);
+  pushSection(out,'新老广告',cur.byNewOld||[],['新老广告','展示','点击','花费','转化次数','转化价值','ROI','CPC','CPA','CTR','CVR']);
+  pushSection(out,'负责人复盘',cur.byOwner||[],['广告负责人','展示','点击','花费','转化次数','转化价值','ROI','CPC','CPA','CTR','CVR']);
+  pushSection(out,'广告系列明细',cur.byCampaign||cur.by_campaign||[],columns);
+  const blob=new Blob(['\uFEFF'+out.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`EVILENERGY_周报快照_${cur.periodStart || ''}_${cur.periodEnd || ''}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 function bindWeeklyEditing(cur){
   setWeeklyEditing(false);
-  const edit=document.getElementById('weeklyEditBtn'), save=document.getElementById('weeklySaveBtn'), cancel=document.getElementById('weeklyCancelBtn'), reset=document.getElementById('weeklyResetBtn');
+  const edit=document.getElementById('weeklyEditBtn'), save=document.getElementById('weeklySaveBtn'), cancel=document.getElementById('weeklyCancelBtn'), reset=document.getElementById('weeklyResetBtn'), exp=document.getElementById('weeklyExportBtn');
   if(edit) edit.onclick=()=>setWeeklyEditing(true);
   if(save) save.onclick=()=>saveWeeklyDraft(cur);
   if(cancel) cancel.onclick=()=>{renderWeeklySnapshot();};
   if(reset) reset.onclick=()=>resetWeeklyDraft(cur);
+  if(exp) exp.onclick=()=>exportWeeklySnapshot(cur);
 }
 function renderAudienceSegments(){
   const el=document.getElementById('audienceSegments');
@@ -1702,7 +1734,14 @@ function renderPlTable(){
   const prevMap={};
   Object.entries(byPlPrev).forEach(([pl,rs])=>{ const p={pl,...agg(rs)}; p.costShare=acctPrev.cost?p.cost/acctPrev.cost:0; p.gmvShare=acctPrev.val?p.val/acctPrev.val:0; prevMap[pl]=p; });
   arr=sortableRows(arr,plSortKey,plSortDir);
-  document.querySelector('#plTable tbody').innerHTML=arr.map(o=>{
+  const totalCur={pl:'汇总',...grandCur};
+  const totalPrev={pl:'汇总',...grandPrev};
+  totalCur.costShare=acctCur.cost?totalCur.cost/acctCur.cost:0;
+  totalCur.gmvShare=acctCur.val?totalCur.val/acctCur.val:0;
+  totalPrev.costShare=acctPrev.cost?totalPrev.cost/acctPrev.cost:0;
+  totalPrev.gmvShare=acctPrev.val?totalPrev.val/acctPrev.val:0;
+  const summaryRow=`<tr class="summary-row"><td>汇总</td><td>—</td><td>—</td>${metricCells(totalCur,totalPrev,acctCur,acctPrev)}</tr>`;
+  document.querySelector('#plTable tbody').innerHTML=summaryRow+arr.map(o=>{
     const prev=prevMap[o.pl]||{};
     // 负责人/运营人员从当前过滤后的 campaign 行里取 dominant（而非静态品线映射），
     // 保证按广告负责人筛选后，品线汇总行显示的负责人与筛选条件一致。
@@ -1716,7 +1755,7 @@ function renderPlTable(){
     const op=top('op');
     return `<tr data-pl="${o.pl}"><td>${o.pl}</td><td>${owner}</td><td>${op}</td>${metricCells(o,prev,acctCur,acctPrev)}</tr>`;
   }).join('');
-  document.querySelectorAll('#plTable tbody tr').forEach(tr=>tr.onclick=()=>{
+  document.querySelectorAll('#plTable tbody tr[data-pl]').forEach(tr=>tr.onclick=()=>{
     const v = state.pl===tr.dataset.pl? '' : tr.dataset.pl;
     state.pl = pending.pl = v;
     document.getElementById('f-pl').value = v;

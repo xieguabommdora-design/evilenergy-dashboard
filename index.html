@@ -599,7 +599,7 @@
 </div>
 
 <script>
-const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608120926"};
+const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608141008"};
 let DASHBOARD_DATA = null;
 let D = null;
 
@@ -2318,6 +2318,15 @@ async function sha256Hex(s){
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
+async function decodePayloadBytes(bytes, compressed){
+  let buf = bytes instanceof ArrayBuffer ? bytes : bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+  if(compressed === 'gzip'){
+    const ds = new DecompressionStream('gzip');
+    const stream = new Response(buf).body.pipeThrough(ds);
+    buf = await new Response(stream).arrayBuffer();
+  }
+  return JSON.parse(new TextDecoder().decode(buf));
+}
 async function decryptPayload(blob, code){  // 共享码模式
   const bytes = b64ToBytes(blob);
   const salt = bytes.slice(0,16);
@@ -2326,7 +2335,7 @@ async function decryptPayload(blob, code){  // 共享码模式
   const baseKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(code), 'PBKDF2', false, ['deriveKey']);
   const key = await crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:200000, hash:'SHA-256'}, baseKey, {name:'AES-GCM', length:256}, false, ['decrypt']);
   const plain = await crypto.subtle.decrypt({name:'AES-GCM', iv:nonce}, key, ct);
-  return JSON.parse(new TextDecoder().decode(plain));
+  return decodePayloadBytes(plain, PAYLOAD.compressed);
 }
 async function unlockEmail(payload, email, code){  // 信封加密：用该邮箱专属授权码解开 dataKey，再解密数据
   const h = await sha256Hex(payload.pub + email.toLowerCase());
@@ -2343,7 +2352,7 @@ async function unlockEmail(payload, email, code){  // 信封加密：用该邮�
   const draw = b64ToBytes(payload.ct);
   const dnonce = draw.slice(0,12), dct = draw.slice(12);
   const plain = await crypto.subtle.decrypt({name:'AES-GCM', iv:dnonce}, dk, dct);
-  return JSON.parse(new TextDecoder().decode(plain));
+  return decodePayloadBytes(plain, payload.compressed);
 }
 async function loadPayload(){
   if(PAYLOAD && PAYLOAD.url){
@@ -2357,7 +2366,16 @@ async function loadPayload(){
       const decompressed = await new Response(stream).arrayBuffer();
       return JSON.parse(new TextDecoder().decode(decompressed));
     }
-    return await r.json();
+    const payload = await r.json();
+    if(payload && payload.chunks && payload.chunkKey){
+      const parts = await Promise.all(payload.chunks.map(async u=>{
+        const rr = await fetch(u, {cache:'no-store'});
+        if(!rr.ok) throw new Error('鏁版嵁鍒嗙墖鍔犺浇澶辫触: '+rr.status);
+        return await rr.text();
+      }));
+      payload[payload.chunkKey] = parts.join('');
+    }
+    return payload;
   }
   return PAYLOAD;
 }

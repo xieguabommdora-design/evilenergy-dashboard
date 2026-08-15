@@ -99,6 +99,9 @@
   .module-divider b{font-size:15px}
   .module-divider:after{content:"";height:1px;background:#dfe5f0;flex:1}
   .note{background:#fff;border:1px solid #d7dee8;border-radius:6px;padding:8px 10px;font-size:12px;color:#475569;margin:14px 0}
+  .update-status{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:#f8fbff;border:1px solid #dbe7ff;border-radius:6px;padding:8px 10px;font-size:12px;color:#334155;margin:-6px 0 12px}
+  .update-status b{color:#0f172a}
+  .update-status span{display:inline-flex;align-items:center;gap:4px}
   .legend{font-size:11px;color:var(--sub);margin-top:6px}
   .btn{background:var(--brand);color:#fff;border:none;border-radius:7px;height:30px;padding:0 16px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
   .btn:hover{opacity:.92}
@@ -321,6 +324,7 @@
   </header>
 
   <div class="note">✅ <b>Shopify 真实数据</b>已接入（SKU 销售额/销量/订单数 + 品线级汇总 + 全站流量/转化率）。✅ <b>竞品展示份额</b>已接入。✅ <b>广告负责人</b>已按后台标签定责。品类流量/转化率已按<b>落地页级</b> ShopifyQL 聚合到各 product_type（真人流量，成单数÷sessions）。</div>
+  <div class="update-status" id="updateStatus"></div>
 
   <div class="filters">
     <div class="f"><label>品线</label><select id="f-pl"><option value="">全部</option></select></div>
@@ -599,7 +603,7 @@
 </div>
 
 <script>
-const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608141008"};
+const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608151318"};
 let DASHBOARD_DATA = null;
 let D = null;
 
@@ -980,6 +984,15 @@ function renderDataHealth(){
   ];
   el.innerHTML=health.map(([t,v,d])=>`<div class="health"><div class="t">${esc(t)}</div><div class="v">${esc(v)}</div><div class="d">${esc(d)}</div></div>`).join('');
 }
+function renderUpdateStatus(){
+  const el=document.getElementById('updateStatus');
+  if(!el) return;
+  const m=D.meta||{};
+  const auto=m.autoUpdateCompletedAt || '暂无记录';
+  const snap=m.snapshotCompletedAt || '暂无记录';
+  const period=(m.snapshotPeriodStart&&m.snapshotPeriodEnd) ? `${m.snapshotPeriodStart} ~ ${m.snapshotPeriodEnd}` : '暂无周期';
+  el.innerHTML=`<span><b>自动更新完成：</b>${esc(auto)}</span><span><b>数据快照完成：</b>${esc(snap)}</span><span><b>快照周期：</b>${esc(period)}</span>`;
+}
 function renderCustomerLifecycle(){
   const box=document.getElementById('lifecycleMetrics');
   const bar=document.getElementById('lifecycleBar');
@@ -1162,7 +1175,7 @@ function renderWeeklySnapshot(){
   const actionRows=actionTargets.length?actionTargets.map(x=>`<div class="action-item"><b>${esc(x.k)}</b><span>${esc(actionOf(x))}</span></div>`).join(''):`<div class="action-item"><b>账户</b><span>本期先积累基线，下周生成新快照后按品线环比制定动作。</span></div>`;
   el.innerHTML=`
     <div class="weekly-head">
-      <div class="hint">快照周期：${cur.periodStart} ~ ${cur.periodEnd} · ${curDays} 天 · ${cur.rows||0} 行广告系列数据 · 上期：${prev?`${prev.periodStart} ~ ${prev.periodEnd}`:'暂无'}</div>
+      <div class="hint">快照周期：${cur.periodStart} ~ ${cur.periodEnd} · ${curDays} 天 · ${cur.rowDescription||`${cur.rows||0} 条汇总数据`} · 上期：${prev?`${prev.periodStart} ~ ${prev.periodEnd}`:'暂无'}</div>
       <label class="hint">切换周期 <select id="weeklySelect">${options}</select></label>
     </div>
     <div class="weekly-tools">
@@ -1985,6 +1998,7 @@ function renderTags(){
 // ---------- master render ----------
 function renderAll(){
   document.getElementById('daterange').textContent=`${state.start} ~ ${state.end}`;
+  renderUpdateStatus();
   renderKPI(); renderInsights(); renderDataHealth(); renderCustomerLifecycle(); renderWeeklySnapshot(); renderAudienceSegments(); renderTrend(); renderTypePie();
   renderCampaignTable(); renderNewOldTable(); renderKeywordTable(); renderPlTable(); renderCompare(); renderAnomaly(); renderTags();
   renderCrumb(); renderDrill();
@@ -2307,7 +2321,7 @@ function initAuction(){
 }
 window.addEventListener('resize',()=>{ if(aucTrendChart)aucTrendChart.resize(); if(aucRankChart)aucRankChart.resize(); });
 
-// ---------- 授权门禁（邮箱模式 / 共享码模式） ----------
+// ---------- 登录门禁（邮箱模式 / 共享账号模式 / 共享码模式） ----------
 function b64ToBytes(b64){
   const bin = atob(b64);
   const arr = new Uint8Array(bin.length);
@@ -2327,7 +2341,7 @@ async function decodePayloadBytes(bytes, compressed){
   }
   return JSON.parse(new TextDecoder().decode(buf));
 }
-async function decryptPayload(blob, code){  // 共享码模式
+async function decryptPayload(blob, code, compressed){  // 共享码模式
   const bytes = b64ToBytes(blob);
   const salt = bytes.slice(0,16);
   const nonce = bytes.slice(16,28);
@@ -2335,7 +2349,7 @@ async function decryptPayload(blob, code){  // 共享码模式
   const baseKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(code), 'PBKDF2', false, ['deriveKey']);
   const key = await crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:200000, hash:'SHA-256'}, baseKey, {name:'AES-GCM', length:256}, false, ['decrypt']);
   const plain = await crypto.subtle.decrypt({name:'AES-GCM', iv:nonce}, key, ct);
-  return decodePayloadBytes(plain, PAYLOAD.compressed);
+  return decodePayloadBytes(plain, compressed);
 }
 async function unlockEmail(payload, email, code){  // 信封加密：用该邮箱专属授权码解开 dataKey，再解密数据
   const h = await sha256Hex(payload.pub + email.toLowerCase());
@@ -2396,26 +2410,41 @@ function decodeArrays(data){
 }
 function showGate(payload){
   const isEmail = payload.mode==='email';
+  const isAccount = payload.mode==='pw' && payload.login==='account';
   const ov = document.createElement('div');
   ov.id='gate';
   ov.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.94);font-family:-apple-system,Segoe UI,Roboto,sans-serif;';
   const fields = isEmail
-    ? `<input id="gateEmail" type="email" placeholder="授权邮箱" autocomplete="off" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;outline:none;margin-bottom:10px;"/>
-       <input id="gateCode" type="password" placeholder="授权码" autocomplete="off" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;outline:none;"/>`
-    : `<input id="gateCode" type="password" placeholder="请输入访问码" autocomplete="off" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;outline:none;"/>`;
+    ? `<input id="gateEmail" type="email" placeholder="授权邮箱" autocomplete="username" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;outline:none;margin-bottom:10px;"/>
+       <input id="gateCode" type="password" placeholder="授权码" autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;outline:none;"/>`
+    : isAccount
+      ? `<input id="gateUser" name="dashboard-view-account" type="text" placeholder="查看账号" autocomplete="off" autocapitalize="none" spellcheck="false" readonly data-lpignore="true" data-1p-ignore="true" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;outline:none;margin-bottom:10px;"/>
+         <input id="gateCode" name="dashboard-view-password" type="password" placeholder="登录密码" autocomplete="new-password" readonly data-lpignore="true" data-1p-ignore="true" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;outline:none;"/>`
+      : `<input id="gateCode" type="password" placeholder="请输入访问码" autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px;outline:none;"/>`;
   ov.innerHTML=`
     <div style="background:#fff;border-radius:16px;padding:34px 30px;width:380px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.45);text-align:center;">
       <div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:4px;">EVILENERGY 数据看板</div>
-      <div style="font-size:13px;color:#64748b;margin-bottom:22px;">${isEmail?'受限内容 · 请输入授权邮箱与授权码':'受限内容 · 需要授权访问'}</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:22px;">${isEmail?'受限内容 · 请输入授权邮箱与授权码':isAccount?'受限内容 · 请登录后查看':'受限内容 · 需要授权访问'}</div>
       ${fields}
       <div id="gateErr" style="color:#dc2626;font-size:12px;height:16px;margin:9px 0 2px;"></div>
-      <button id="gateBtn" style="width:100%;padding:12px;border:none;border-radius:10px;background:#4f46e5;color:#fff;font-size:15px;font-weight:700;cursor:pointer;">解锁查看</button>
+      <button id="gateBtn" style="width:100%;padding:12px;border:none;border-radius:10px;background:#2563eb;color:#fff;font-size:15px;font-weight:700;cursor:pointer;">${isAccount?'登录查看':'解锁查看'}</button>
       <div id="gateStat" style="color:#64748b;font-size:12px;margin-top:14px;height:16px;"></div>
     </div>`;
   document.body.appendChild(ov);
   const btn=ov.querySelector('#gateBtn'), err=ov.querySelector('#gateErr'), stat=ov.querySelector('#gateStat');
-  const emailInp=ov.querySelector('#gateEmail'), codeInp=ov.querySelector('#gateCode');
-  if(emailInp) emailInp.focus(); else codeInp.focus();
+  const emailInp=ov.querySelector('#gateEmail'), userInp=ov.querySelector('#gateUser'), codeInp=ov.querySelector('#gateCode');
+  if(isAccount){
+    const preventOldLoginAutofill = inp => {
+      if(!inp) return;
+      inp.value='';
+      const enableManualEntry = () => { inp.readOnly=false; inp.value=''; };
+      inp.addEventListener('pointerdown', enableManualEntry, {once:true});
+      inp.addEventListener('keydown', enableManualEntry, {once:true});
+      setTimeout(()=>{ if(inp.readOnly) inp.value=''; }, 300);
+    };
+    preventOldLoginAutofill(userInp);
+    preventOldLoginAutofill(codeInp);
+  } else if(emailInp) emailInp.focus(); else codeInp.focus();
   async function tryUnlock(){
     btn.disabled=true; err.textContent=''; stat.textContent='正在验证…';
     try{
@@ -2426,14 +2455,20 @@ function showGate(payload){
         data = await unlockEmail(payload, email, code);
       } else {
         const code=codeInp.value.trim();
-        if(!code){ err.textContent='请输入访问码'; btn.disabled=false; stat.textContent=''; return; }
-        data = await decryptPayload(payload.blob, code);
+        if(isAccount){
+          const user=userInp.value.trim().toLowerCase();
+          if(!user||!code){ err.textContent='请输入账号和密码'; btn.disabled=false; stat.textContent=''; return; }
+          const userHash=await sha256Hex(payload.userPub + user);
+          if(userHash!==payload.userHash) throw new Error('bad_login');
+        } else if(!code){ err.textContent='请输入访问码'; btn.disabled=false; stat.textContent=''; return; }
+        data = await decryptPayload(payload.blob, code, payload.compressed);
       }
       ov.remove(); startApp(data);
     }catch(e){
       btn.disabled=false; stat.textContent='';
       if(isEmail && e && e.message==='not_authorized') err.textContent='该邮箱未被授权，请联系管理员';
       else if(isEmail) err.textContent='邮箱或授权码错误';
+      else if(isAccount) err.textContent='账号或密码错误';
       else err.textContent='访问码错误或无权限';
     }
   }

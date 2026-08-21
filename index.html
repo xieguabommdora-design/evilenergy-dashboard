@@ -605,7 +605,7 @@
 </div>
 
 <script>
-const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608211349"};
+const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608211412"};
 let DASHBOARD_DATA = null;
 let D = null;
 
@@ -1175,6 +1175,22 @@ function renderWeeklySnapshot(){
   }).join('');
   const actionTargets=[...difficulties, ...highlights].slice(0,6);
   const actionRows=actionTargets.length?actionTargets.map(x=>`<div class="action-item"><b>${esc(x.k)}</b><span>${esc(actionOf(x))}</span></div>`).join(''):`<div class="action-item"><b>账户</b><span>本期先积累基线，下周生成新快照后按品线环比制定动作。</span></div>`;
+  const wow=cur.wow||null;
+  const wowRow=(x,dir)=>{
+    const flags=(x.flags||[]).map(f=>`<span class="rating ${f.includes('断崖')||f.includes('白烧')?'bad':(f.includes('大单')?'watch':'new')}">${esc(f)}</span>`).join(' ');
+    const cvrTxt=(x.prevCvr||x.curCvr)?`${x.prevCvr.toFixed(2)}% → ${x.curCvr.toFixed(2)}%`:'—';
+    const aovTxt=(x.prevAov||x.curAov)?`$${Math.round(x.prevAov)} → $${Math.round(x.curAov)}`:'—';
+    const clkTxt=`${Math.round(x.prevClk)} → ${Math.round(x.curClk)}`;
+    return `<tr><td title="${esc(x.campaign)}">${esc(x.campaign)}</td><td>${esc(x.pl)}</td><td>${esc(x.owner||'未标')}</td><td><span class="delta ${dir==='down'?'down':'up'}">${dir==='down'?'▼':'▲'}${fmtMoney(Math.abs(x.delta))}</span></td><td>${fmtMoney(x.prevVal)} → ${fmtMoney(x.curVal)}</td><td>${cvrTxt}</td><td>${aovTxt}</td><td>${clkTxt}</td><td>${esc((x.factors||[]).join('，')||'小幅波动')}</td><td>${flags||'—'}</td></tr>`;
+  };
+  const wowHead='<tr><th>系列</th><th>品线</th><th>负责人</th><th>GMV变动</th><th>GMV 上期→本期</th><th>CVR 上→本</th><th>客单 上→本</th><th>点击 上→本</th><th>归因分解</th><th>标签</th></tr>';
+  const wowSection=wow?`
+    <div class="weekly-section"><h4>系列级 GMV 归因下钻（vs 上期 ${wow.prevStart} ~ ${wow.prevEnd}）</h4>
+      <p class="hint" style="margin:0 0 8px">下滑 TOP：GMV 变动按 流量/CVR/客单 三因子分解；标签含 转化断崖（转化归零）、零转化白烧（日耗≥$30 且 0 转化）、上期单日大单抬高基数、已暂停。</p>
+      <div class="weekly-table-wrap"><table class="weekly-table"><thead>${wowHead}</thead><tbody>${(wow.declines||[]).map(x=>wowRow(x,'down')).join('') || '<tr><td colspan="10" class="hint">本期无明显下滑系列</td></tr>'}</tbody></table></div>
+      <h4 style="margin-top:12px">GMV 上升驱动 TOP</h4>
+      <div class="weekly-table-wrap"><table class="weekly-table"><thead>${wowHead}</thead><tbody>${(wow.risers||[]).map(x=>wowRow(x,'up')).join('') || '<tr><td colspan="10" class="hint">本期无明显上升系列</td></tr>'}</tbody></table></div>
+    </div>`:'';
   el.innerHTML=`
     <div class="weekly-head">
       <div class="hint">快照周期：${cur.periodStart} ~ ${cur.periodEnd} · ${curDays} 天 · ${cur.rowDescription||`${cur.rows||0} 条汇总数据`} · 上期：${prev?`${prev.periodStart} ~ ${prev.periodEnd}`:'暂无'}</div>
@@ -1201,6 +1217,7 @@ function renderWeeklySnapshot(){
       <div class="report-block" data-editable="weekly"><h4>本周难点</h4><ul>${list(difficulties,'暂无明显难点品线。',x=>`${x.k}：ROI ${num(x.r,'ROI').toFixed(2)}，${causeOf(x)}`).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
     </div>
     <div class="weekly-section"><h4>上升品线 / 下降品线</h4><div class="weekly-table-wrap"><table class="weekly-table"><thead><tr><th>品线</th><th>方向</th><th>ROI</th><th>ROI环比</th><th>转化价值</th><th>转化价值环比</th><th>主要原因</th></tr></thead><tbody>${moveRows(rise,'上升') + moveRows(fall,'下降') || '<tr><td colspan="7" class="hint">暂无同口径品线环比</td></tr>'}</tbody></table></div></div>
+    ${wowSection}
     <div class="weekly-section"><h4>品线复盘明细 Top 12</h4><div class="weekly-table-wrap"><table class="weekly-table"><thead><tr><th>品线</th><th>评级</th><th>ROI</th><th>ROI环比</th><th>花费</th><th>转化价值</th><th>价值环比</th><th>CVR</th><th>CPA</th><th>判断</th></tr></thead><tbody>${plTableRows || '<tr><td colspan="10" class="hint">暂无品线快照</td></tr>'}</tbody></table></div></div>
     <div class="weekly-section"><h4>新老广告表现</h4><div class="weekly-table-wrap"><table class="weekly-table"><thead><tr><th>系列</th><th>ROI</th><th>ROI环比</th><th>花费</th><th>转化价值</th><th>价值环比</th><th>花费占比</th></tr></thead><tbody>${newOldRows || '<tr><td colspan="7" class="hint">暂无新老广告快照</td></tr>'}</tbody></table></div></div>
     <div class="weekly-section"><h4>负责人复盘</h4><div class="weekly-table-wrap"><table class="weekly-table"><thead><tr><th>负责人</th><th>花费</th><th>转化价值</th><th>ROI</th><th>ROI环比</th><th>转化次数</th></tr></thead><tbody>${ownerRows || '<tr><td colspan="6" class="hint">暂无负责人快照</td></tr>'}</tbody></table></div></div>

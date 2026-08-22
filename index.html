@@ -108,6 +108,9 @@
   .btn:hover{opacity:.92}
   .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--txt)}
   .btn.tiny{height:24px;padding:0 10px;font-size:11px}
+  .export-btn{gap:6px;background:#fff;border:1px solid #b8ccff;color:#0f5bd6;font-weight:700;box-shadow:0 1px 2px rgba(15,91,214,.06)}
+  .export-btn:before{content:"\2193";display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:5px;background:#eaf2ff;font-size:12px;line-height:1}
+  .export-btn:hover{background:#f4f8ff;border-color:#7fa7f5;opacity:1}
   .stack{display:flex;flex-direction:column;gap:14px;margin-bottom:16px}
   html{scroll-behavior:smooth}
   .side-nav{position:fixed;left:0;top:0;bottom:0;width:240px;z-index:40;background:#fff;border-right:1px solid #d7dee8;border-radius:0;padding:22px 14px;box-shadow:none}
@@ -606,7 +609,7 @@
 </div>
 
 <script>
-const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608211441"};
+const PAYLOAD = {"mode": "gz", "url": "data.json?v=202608221422"};
 let DASHBOARD_DATA = null;
 let D = null;
 
@@ -2129,23 +2132,39 @@ function workspaceFromHash(hash){
   return 'dashboard';
 }
 
-// ---------- CSV 导出（导出当前筛选+排序后的表格）----------
+// ---------- Excel 导出（当前筛选 + 当前排序 + 可读样式）----------
+function exportEsc(v){
+  return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function exportFilterSummary(){
+  const parts=[];
+  const labels=[['pl','品线'],['type','广告类型'],['owner','广告负责人'],['op','运营人员']];
+  labels.forEach(([key,label])=>{ if(state[key]) parts.push(`${label}：${state[key]}`); });
+  return parts.length ? parts.join('　|　') : '筛选：全部';
+}
+function downloadStyledExcel(name, headers, body){
+  if(!body.length){ alert('当前筛选范围暂无可导出数据'); return; }
+  const period=`${state.start||''} ~ ${state.end||''}`;
+  const generated=new Date().toLocaleString('zh-CN',{hour12:false});
+  const cols=Math.max(headers.length,1);
+  const head=headers.map(v=>`<th>${exportEsc(v)}</th>`).join('');
+  const rows=body.map((row,ri)=>`<tr class="${ri%2?'even':'odd'}">${row.map((v,ci)=>`<td class="${ci===0?'first ':' '}${/^[-+]?[$¥￥]?\s*[\d,.]+%?$/.test(String(v).trim())?'num':''}">${exportEsc(v)}</td>`).join('')}</tr>`).join('');
+  const html=`<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"><style>
+    body{font-family:"Microsoft YaHei",Arial,sans-serif;color:#172033}.report{border-collapse:collapse;min-width:980px;font-size:11pt}.report td,.report th{border:1px solid #d9e2f0;padding:7px 10px;vertical-align:middle}.title{background:#0f5bd6!important;color:#fff;font-size:18pt;font-weight:700;text-align:left;padding:14px!important}.meta{background:#eaf2ff!important;color:#334155;text-align:left}.report th{background:#2563eb;color:#fff;font-weight:700;text-align:center;white-space:nowrap}.report tr.even td{background:#f7faff}.report td.first{font-weight:600;text-align:left}.report td.num{text-align:right;mso-number-format:"\\@"}.foot{color:#64748b;font-size:9pt;text-align:left}
+  </style></head><body><table class="report"><tr><td class="title" colspan="${cols}">${exportEsc(name)}</td></tr><tr><td class="meta" colspan="${cols}">数据区间：${exportEsc(period)}　|　${exportEsc(exportFilterSummary())}</td></tr><tr><td class="meta" colspan="${cols}">导出时间：${exportEsc(generated)}　|　数据口径：Google Ads 平台</td></tr><tr>${head}</tr>${rows}<tr><td class="foot" colspan="${cols}">EVILENERGY 数据看板 · 共 ${body.length} 条记录</td></tr></table></body></html>`;
+  const blob=new Blob(['\uFEFF'+html],{type:'application/vnd.ms-excel;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`${name}_${state.start||''}_${state.end||''}.xls`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
 function exportTable(tableId, name){
   const table=document.getElementById(tableId);
   if(!table) return;
-  const rows=[...table.querySelectorAll('tr')];
-  const csv=rows.map(tr=>[...tr.querySelectorAll('th,td')].map(td=>{
-    let t=(td.innerText||'').replace(/\s+/g,' ').trim();
-    if(t.indexOf(',')>=0 || t.indexOf('"')>=0 || t.indexOf('\n')>=0) t='"'+t.replace(/"/g,'""')+'"';
-    return t;
-  }).join(',')).join('\r\n');
-  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a');
-  const d=new Date().toISOString().slice(0,10);
-  a.href=URL.createObjectURL(blob);
-  a.download=`${name}_${state.start}_${state.end}.csv`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  const headers=[...table.querySelectorAll('thead th')].map(th=>(th.innerText||'').replace(/\s+/g,' ').trim());
+  const body=[...table.querySelectorAll('tbody tr')].filter(tr=>!tr.hidden).map(tr=>[...tr.querySelectorAll('th,td')].map(td=>(td.innerText||'').replace(/\s+/g,' ').trim()));
+  downloadStyledExcel(name,headers,body);
 }
 function exportKeywordAll(){
   const rows=getKwRows();
@@ -2154,17 +2173,19 @@ function exportKeywordAll(){
   const body=rows.map(r=>[r.term,
     r.cost.toFixed(2),r.val.toFixed(2),r.roi.toFixed(2),r.cpc.toFixed(2),r.cpa.toFixed(2),
     r.conv.toFixed(2),(r.cvr*100).toFixed(2)+'%',(r.ctr*100).toFixed(2)+'%',r.imp]);
-  const csv=[head,...body].map(a=>a.map(v=>{let t=String(v);
-    if(t.indexOf(',')>=0||t.indexOf('"')>=0||t.indexOf('\n')>=0) t='"'+t.replace(/"/g,'""')+'"';
-    return t;}).join(',')).join('\r\n');
-  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`关键词分析_Top100_${state.start||''}_${state.end||''}.csv`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  downloadStyledExcel('关键词分析_Top100',head,body);
 }
 function exportNewOld(){ exportTable('newoldTable','新老广告环比'); }
+
+function enhanceExportButtons(){
+  document.querySelectorAll('button').forEach(btn=>{
+    if((btn.textContent||'').includes('导出CSV') && btn.id!=='weeklyExportBtn'){
+      btn.textContent='导出 Excel';
+      btn.classList.add('export-btn');
+      btn.title='导出当前筛选与排序结果（带标题、筛选摘要和表格样式）';
+    }
+  });
+}
 
 // ---------- init UI ----------
 function syncFiltersToPending(){
@@ -2567,6 +2588,7 @@ function boot(){
   initAuction();
   renderAll();
   setWorkspace(state.workspace || workspaceFromHash(location.hash));
+  enhanceExportButtons();
 }
 function startApp(data){
   decodeArrays(data);
